@@ -1,0 +1,700 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#            NEBUNEX FRONTEND - FUNCTIONALITY & IMPLEMENTATION DOCS
+# ═══════════════════════════════════════════════════════════════════════════════
+# Generated: 2026-02-09
+# Purpose: Documents all features, API integrations, and implementation details
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TABLE OF CONTENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 1. PROJECT OVERVIEW
+# 2. TECHNOLOGY STACK
+# 3. BACKEND CONNECTION SETUP
+# 4. PAGE IMPLEMENTATIONS
+#    4.1 Dashboard
+#    4.2 Projects
+#    4.3 Tasks (Kanban)
+#    4.4 Placeholder Pages
+# 5. AGENT SYSTEM (AI Presence)
+#    5.1 Agent Orb
+#    5.2 Agent Living Popup
+#    5.3 Cognitive Stream
+#    5.4 Intervention Layer
+#    5.5 Time Flow Ring
+# 6. STATE MANAGEMENT & HOOKS
+# 7. API SERVICE LAYER
+# 8. DESIGN SYSTEM
+# 9. ANIMATIONS & INTERACTIONS
+# 10. FUTURE IMPLEMENTATION NOTES
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 1. PROJECT OVERVIEW
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Project Name: NEBUNEX
+Description: A personal life operating system with an intelligent AI agent that 
+             monitors productivity, health, finances, and provides proactive 
+             interventions and insights.
+
+Key Features:
+- Dashboard with productivity scoring and streak tracking
+- Project management with CRUD operations
+- Kanban-style task management
+- AI Agent with living presence (visual orb, cognitive stream)
+- Proactive agent interventions with wellness checks
+- Time-aware scheduling visualization
+- Behavior tracking (flow state detection)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 2. TECHNOLOGY STACK
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Frontend Framework:
+- React 18 with TypeScript
+- Vite as build tool
+
+UI & Styling:
+- Tailwind CSS with custom design tokens
+- Framer Motion for animations
+- shadcn/ui component library
+- Lucide React icons
+
+State Management:
+- TanStack React Query (for server state)
+- React useState/useEffect (for local state)
+- Custom hooks for complex state logic
+
+Routing:
+- React Router DOM v6
+
+Fonts:
+- Space Grotesk (display/headings)
+- Inter (body text)
+- JetBrains Mono (monospace/code)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 3. BACKEND CONNECTION SETUP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+The frontend connects to a FastAPI backend running on port 3847.
+
+CONNECTION METHOD: Vite Dev Server Proxy
+----------------------------------------
+
+vite.config.ts:
+```typescript
+proxy: {
+  "/api": {
+    target: "http://localhost:3847",
+    changeOrigin: true,
+  },
+}
+```
+
+API Service (src/services/api.ts):
+```typescript
+const BASE = import.meta.env.VITE_API_BASE ?? '/api';
+// All requests go through `/api` and get proxied to backend
+```
+
+IMPORTANT RULES:
+1. Use relative paths ('/api') NOT absolute URLs
+2. Proxy handles CORS automatically
+3. Restart dev server after config changes
+4. Backend must be running on port 3847
+
+API ENDPOINTS SUPPORTED:
+------------------------
+- GET  /api/dashboard             - Dashboard summary data
+- GET  /api/projects              - List all projects
+- POST /api/projects              - Create project
+- PUT  /api/projects/:id          - Update project
+- DELETE /api/projects/:id        - Delete project
+- GET  /api/tasks/kanban          - Get tasks in kanban format
+- POST /api/tasks                 - Create task
+- PUT  /api/tasks/:id/move        - Move task between columns
+- DELETE /api/tasks/:id           - Delete task
+- GET  /api/productivity/score/today - Today's productivity score
+- GET  /api/productivity/streak   - Current streak data
+- GET  /api/tasks/daily/goals     - Daily goals
+- GET  /api/agent/status          - Agent state
+- GET  /api/activity/timeline     - Agent activity timeline
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 4. PAGE IMPLEMENTATIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+4.1 DASHBOARD (src/pages/Dashboard.tsx)
+----------------------------------------
+Connected to backend: YES
+
+Features:
+- Greeting message (time-based: morning/afternoon/evening)
+- Productivity score ring (animated SVG)
+- Day streak counter with flame icon
+- Flow state detection message
+- Stats grid: Tasks Today, Week Tasks, Goals Met, Check-ins
+- Active Projects grid (up to 4 projects)
+- Today's Goals checklist
+- AI Insights action buttons
+- Agent status indicator with orb
+
+Data Sources:
+- useDashboardData() hook aggregates multiple API calls:
+  - /api/dashboard
+  - /api/productivity/score/today
+  - /api/productivity/streak
+  - /api/tasks/daily/goals
+  - /api/projects?status=active
+
+Props Received:
+- agentEmotion: Current agent emotional state
+- anticipations: Upcoming events/reminders
+- behavior: User behavior tracking state
+
+
+4.2 PROJECTS (src/pages/ProjectsPage.tsx)
+------------------------------------------
+Connected to backend: YES
+
+Features:
+- Project cards in 3-column grid
+- Create project dialog (name + description)
+- Dropdown menu per project (Edit, Open, Delete)
+- Status badges with color coding
+- Progress bars with animation
+- Health score display (if available)
+
+API Operations:
+- GET /api/projects - List projects
+- POST /api/projects - Create project
+- DELETE /api/projects/:id - Delete project
+
+Status Colors:
+- ideation: muted gray
+- planning: amber (thinking)
+- in-development: blue (primary)
+- production: green (accent)
+- archived: muted gray
+
+
+4.3 TASKS / KANBAN (src/pages/TasksPage.tsx)
+---------------------------------------------
+Connected to backend: YES
+
+Features:
+- 3-column Kanban board (To Do, In Progress, Done)
+- Create task dialog (title + priority)
+- Priority badges (low, medium, high, critical)
+- Click circle to mark complete (moves to Done)
+- Delete button on hover
+- Task counts per column
+
+API Operations:
+- GET /api/tasks/kanban - Get tasks grouped by status
+- POST /api/tasks - Create task (default status: todo)
+- PUT /api/tasks/:id/move - Move task to new status
+- DELETE /api/tasks/:id - Delete task
+
+Priority Colors:
+- low: muted gray
+- medium: amber
+- high: orange/coral
+- critical: red
+
+
+4.4 PLACEHOLDER PAGES
+----------------------
+Connected to backend: NO (awaiting implementation)
+
+Pages using PlaceholderPage component:
+- Productivity (/productivity)
+- Wellness (/health)
+- Finances (/finances)
+- Knowledge (/knowledge)
+- Vault (/vault)
+- Freelance (/freelance)
+- AI Chat (/ai_chat)
+- Settings (/settings)
+
+Each shows:
+- Icon in soft container
+- Title
+- Description
+- "Connect your backend to populate this page" message
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 5. AGENT SYSTEM (AI Presence)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+The Agent is an AI presence that observes user behavior, makes decisions, and 
+proactively intervenes when appropriate.
+
+5.1 AGENT ORB (src/components/agent/AgentOrb.tsx)
+--------------------------------------------------
+A breathing, animated indicator showing agent's emotional state.
+
+Emotions Supported:
+- calm: Blue tones, slow breathing (4s), minimal scale
+- thinking: Amber/gold, faster breathing (1.8s), more movement
+- concerned: Coral/red, medium breathing (2.5s)
+- firm: Gray tones, minimal animation (1s)
+- success: Green tones, relaxed breathing (3s)
+
+Sizes: sm (32px), md (44px), lg (64px)
+
+Used in:
+- Sidebar (logo area)
+- Header (right side)
+- Dashboard (status indicator)
+
+
+5.2 AGENT LIVING POPUP (src/components/agent/AgentLivingPopup.tsx)
+-------------------------------------------------------------------
+Full-screen modal showing the agent's "mind" and current activities.
+
+Trigger: Click agent orb OR Cmd/Ctrl + .
+
+Components Inside:
+- Close button (top right)
+- Session timer (top left)
+- State indicator (top center)
+- TimeFlowRing (behind core)
+- AgentPresenceCore (center)
+- CognitiveStream (bottom panel)
+- InterventionLayer (overlay when active)
+
+States:
+- idle: Observing, slow animations
+- thinking: Faster animations, amber colors
+- executing: Active work, blue tones
+- intervening: Requires user input, expands core
+- waiting: Awaiting response
+- listening: Voice input mode (not implemented)
+
+API Connection:
+- useAgentApi() hook fetches:
+  - /api/agent/status (every 5s)
+  - /api/activity/timeline (every 8s)
+
+
+5.3 COGNITIVE STREAM (src/components/agent/CognitiveStream.tsx)
+----------------------------------------------------------------
+Displays the agent's "thoughts" in a scrolling list.
+
+Thought Types:
+- observation (○): Gray, neutral observations
+- evaluation (◐): Amber, analyzing/comparing
+- decision (◆): Blue, made a choice
+- action (▸): Green, executing something
+- waiting (◎): Coral, waiting for input
+
+Features:
+- Fade gradient at top
+- Latest thought is full opacity
+- Older thoughts fade based on age
+- Animated entrance/exit
+- Symbol prefix per thought type
+
+
+5.4 INTERVENTION LAYER (src/components/agent/InterventionLayer.tsx)
+--------------------------------------------------------------------
+Overlay that appears when agent needs user input.
+
+Features:
+- Dimmed background (click to dismiss)
+- Centered message from agent
+- Text input with mic button (voice not implemented)
+- "Later" and "Respond" buttons
+- Listening animation (when voice active)
+- Speaking animation (when agent speaks)
+
+Triggers (simulated):
+- After 25 seconds of popup being open
+- Message: Wellness check reminder
+
+
+5.5 TIME FLOW RING (src/components/agent/TimeFlowRing.tsx)
+-----------------------------------------------------------
+Circular timeline showing past, present, and future events.
+
+Features:
+- Arc from 7 o'clock to 5 o'clock position
+- Dashed gradient line for time flow
+- Event markers positioned by minutesFromNow
+- "Now" indicator with pulse animation
+- Approaching events pulse/glow
+- Center shows current time (HH:MM)
+
+Event Types:
+- past: Muted color
+- now: Primary blue, pulsing
+- approaching: Amber/coral based on importance
+- future: Secondary gray
+
+Static Events (demo):
+- Session start (-45 min)
+- Task completed (-15 min)
+- Now (0)
+- Health check (+12 min)
+- Task deadline (+45 min)
+- Finance review (+90 min)
+
+
+5.6 AGENT PRESENCE CORE (src/components/agent/AgentPresenceCore.tsx)
+---------------------------------------------------------------------
+The central animated orb in the living popup.
+
+Features:
+- Multiple concentric rotating layers
+- Ambient glow effect
+- Core orb with gradient
+- Inner highlight for 3D effect
+- State-specific colors and animation speeds
+
+State Configurations:
+- idle: 3 layers, 60s rotation, 5s breathing
+- thinking: 4 layers, 20s rotation, 2s breathing
+- executing: 3 layers, 8s rotation, 1.2s breathing
+- intervening: 3 layers, 15s rotation, 1.5s breathing
+- waiting: 3 layers, 40s rotation, 3s breathing
+- listening: 4 layers, 12s rotation, 0.8s breathing
+
+
+5.7 COGNITIVE TIMELINE (src/components/agent/CognitiveTimeline.tsx)
+--------------------------------------------------------------------
+Slide-in panel showing agent decision history (legacy component).
+
+Features:
+- Slide in from right
+- Agent orb in header
+- Vertical timeline with icons
+- Timestamp formatting (just now, Xm ago, Xh ago)
+- Entry count in footer
+
+Entry Types:
+- noticed (Eye icon)
+- compared (GitCompare icon)
+- decided (Lightbulb icon)
+- waiting (Clock icon)
+- adjusted (Settings icon)
+- intervened (Zap icon)
+
+
+5.8 ANTICIPATION LAYER (src/components/agent/AnticipationLayer.tsx)
+--------------------------------------------------------------------
+Grid of upcoming events/reminders on dashboard.
+
+Features:
+- 3-column grid of cards
+- Icon per type (action, reminder, warning)
+- Confidence-based opacity
+- Time until event
+- Gradient background per type
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 6. STATE MANAGEMENT & HOOKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+6.1 useDashboardData (src/hooks/useDashboardData.ts)
+-----------------------------------------------------
+Aggregates dashboard data from multiple endpoints.
+
+Queries:
+- /api/dashboard (30s stale, 60s refetch)
+- /api/productivity/score/today (30s stale)
+- /api/productivity/streak (60s stale)
+- /api/tasks/daily/goals (30s stale)
+- /api/projects?status=active (60s stale)
+
+Returns:
+- data: Merged dashboard data
+- isLoading: Any query loading
+- error: First error encountered
+- refetch(): Refetch all queries
+
+
+6.2 useAgentApi (src/hooks/useAgentApi.ts)
+-------------------------------------------
+Fetches agent status and timeline from backend.
+
+Queries:
+- /api/agent/status (5s refetch, 3s stale)
+- /api/activity/timeline (8s refetch, 5s stale)
+
+Returns:
+- status: Raw status object
+- agentState: Mapped to valid state enum
+- thoughts: Timeline mapped to CognitiveThought[]
+- isLoading, error, refetch
+
+
+6.3 useAgentState (src/hooks/useAgentState.ts)
+-----------------------------------------------
+Client-side agent state simulation (fallback when no backend).
+
+Features:
+- Emotion cycling (8s interval)
+- Random cognitive entries (25s interval)
+- Mock anticipation items
+- Trust level tracking
+
+Returns:
+- emotion, currentTask, isActive, trustLevel
+- cognitiveTimeline: CognitiveEntry[]
+- anticipations: AnticipationItem[]
+- setEmotion(), setAnticipations()
+
+
+6.4 useBehaviorTracking (src/hooks/useBehaviorTracking.ts)
+-----------------------------------------------------------
+Tracks user behavior for flow state detection.
+
+Tracked Metrics:
+- isInFlow: True if focused >15min, inactive <2min, skips <2
+- focusDuration: Minutes since focus started
+- inactivityDuration: Seconds since last activity
+- sessionMood: calm, productive, struggling, neutral
+- consistency: 0-100 score
+- taskSkipCount: Number of skipped tasks
+
+Activity Events: mousemove, keydown, click
+
+Returns:
+- behavior: BehaviorState object
+- recordTaskSkip(): Increment skip count
+- recordTaskComplete(): Boost consistency
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 7. API SERVICE LAYER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Location: src/services/api.ts
+
+Core Function:
+```typescript
+async function request(path: string, options?: RequestInit) {
+  const res = await fetch(`${BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || 'Request failed');
+  }
+  return res.json();
+}
+```
+
+API Modules:
+- api.dashboard() - Dashboard summary
+- api.projects.* - Projects CRUD
+- api.tasks.* - Tasks and Kanban
+- api.tasks.goals.* - Daily goals
+- api.productivity.* - Scores, streaks, heatmaps
+- api.health.* - Wellness tracking
+- api.finances.* - Transactions, budgets
+- api.knowledge.* - Bookmarks, reading lists
+- api.vault.* - Password vault
+- api.freelance.* - Client management
+- api.ai.chat() - AI chat messages
+- api.agent.* - Agent status and chat
+- api.search.query() - Global search
+- api.notifications.* - Notification CRUD
+- api.activity.* - Activity timeline
+- api.users.* - User profile
+- api.data.* - Export functionality
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 8. DESIGN SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+
+8.1 COLOR TOKENS (src/index.css)
+---------------------------------
+Base Colors:
+- --background: Deep navy (#080a0f)
+- --foreground: Light gray (#e1e4e8)
+- --card: Slightly lighter navy
+- --primary: Cyan blue (200 70% 50%)
+- --secondary: Dark gray
+- --muted: Darker gray
+- --accent: Teal green (160 55% 42%)
+- --destructive: Red (0 65% 55%)
+
+Agent Colors:
+- --agent-calm: Blue
+- --agent-thinking: Amber
+- --agent-concerned: Coral
+- --agent-firm: Gray
+- --agent-success: Green
+
+Surface Colors:
+- --surface-elevated: Slightly lighter
+- --surface-sunken: Darkest
+
+Glow Colors:
+- --glow-calm, --glow-thinking, --glow-concerned
+
+
+8.2 TYPOGRAPHY
+---------------
+Font Families:
+- .font-display: Space Grotesk (headings)
+- .font-sans: Inter (body)
+- .font-mono: JetBrains Mono (code/labels)
+
+Usage:
+- H1, H2, H3: font-display
+- Body text: font-sans
+- Labels, stats, time: font-mono
+
+
+8.3 SPACING & SIZING
+---------------------
+Border Radius:
+- --radius: 0.75rem (12px)
+- Variants: lg, md, sm
+
+Common Patterns:
+- Cards: rounded-xl (16px)
+- Buttons: rounded-lg (12px)
+- Pills/badges: rounded-full
+
+
+8.4 COMPONENT CLASSES
+----------------------
+Custom Tailwind Components (index.css):
+- .living-surface: Animated gradient background
+- .soft-friction: Heavy transition on interaction
+- .timeline-connector: Vertical line for timelines
+- .flow-mode .non-essential: Fade non-essential UI
+- .agent-breathe, .agent-think, etc.: Animation classes
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 9. ANIMATIONS & INTERACTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+Animation Library: Framer Motion
+
+9.1 PAGE TRANSITIONS
+---------------------
+- Initial: opacity 0, y 10-12px
+- Animate: opacity 1, y 0
+- Duration: 0.4-0.5s
+- Easing: easeOut or custom bezier
+
+9.2 LIST ITEMS
+---------------
+- Staggered delay: i * 0.05-0.08s
+- AnimatePresence for add/remove
+- Exit: opacity 0, scale 0.95
+
+9.3 AGENT ANIMATIONS
+---------------------
+- Breathing: scale oscillation
+- Rotation: continuous for layers
+- Pulse: opacity + scale for alerts
+- Blur: filter for thought transitions
+
+9.4 INTERACTIVE ELEMENTS
+-------------------------
+- whileHover: scale 1.05-1.1
+- whileTap: scale 0.95
+- Transition: spring or custom ease
+
+9.5 KEYFRAME ANIMATIONS (CSS)
+------------------------------
+- breathe: Scale + opacity pulse
+- think: Scale + rotation oscillation
+- concern: Scale + box-shadow pulse
+- anticipateIn: Blur + translate + scale
+- livingShift: Background position shift
+- pulseSubtle: Simple opacity pulse
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 10. FUTURE IMPLEMENTATION NOTES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+PAGES NEEDING BACKEND CONNECTION:
+---------------------------------
+1. Productivity Page
+   - Score history chart
+   - Heatmap calendar
+   - Weekly reports
+   - Endpoints: /productivity/*
+
+2. Wellness Page
+   - Mental health check-ins
+   - Workout logging
+   - Endpoints: /health/*
+
+3. Finances Page
+   - Transaction list
+   - Budget tracking
+   - Spending charts
+   - Endpoints: /finances/*
+
+4. Knowledge Page
+   - Bookmarks list
+   - Reading list
+   - Learning stats
+   - Endpoints: /knowledge/*
+
+5. Vault Page
+   - Credential list
+   - Password generator
+   - Security score
+   - Endpoints: /vault/*
+
+6. Freelance Page
+   - Client list
+   - Earnings stats
+   - Endpoints: /freelance/*
+
+7. AI Chat Page
+   - Chat interface
+   - Message history
+   - Endpoints: /ai/chat
+
+8. Settings Page
+   - User profile
+   - Export data
+   - Endpoints: /users/me, /data/*
+
+
+AGENT ENHANCEMENTS NEEDED:
+---------------------------
+1. Voice input/output (Web Speech API)
+2. Push notifications for interventions
+3. Learning from user preferences
+4. More sophisticated scheduling
+5. Integration with calendar APIs
+
+
+PERFORMANCE OPTIMIZATIONS:
+---------------------------
+1. Virtualized lists for long data
+2. Image optimization/lazy loading
+3. Code splitting per page
+4. Service worker for offline
+5. Reduce animation complexity on low-end devices
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF FUNCTIONALITY DOCUMENTATION
+# ═══════════════════════════════════════════════════════════════════════════════
