@@ -6,6 +6,7 @@ import {
 import { AppSidebar, type PageKey } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { CognitiveTimeline } from '@/components/agent/CognitiveTimeline';
+import { AgentLivingPopup } from '@/components/agent/AgentLivingPopup';
 import { useAgentState } from '@/hooks/useAgentState';
 import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 import DashboardPage from '@/pages/Dashboard';
@@ -14,15 +15,24 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage';
 const Index = () => {
   const [page, setPage] = useState<PageKey>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [legacyTimelineOpen, setLegacyTimelineOpen] = useState(false);
+  const [livingPopupOpen, setLivingPopupOpen] = useState(false);
 
   const agent = useAgentState();
   const { behavior } = useBehaviorTracking();
 
-  // Ctrl+K placeholder
+  // Keyboard handlers
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setTimelineOpen(false);
+      if (e.key === 'Escape') {
+        setLegacyTimelineOpen(false);
+        setLivingPopupOpen(false);
+      }
+      // Open living popup with Cmd/Ctrl + .
+      if ((e.metaKey || e.ctrlKey) && e.key === '.') {
+        e.preventDefault();
+        setLivingPopupOpen(true);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -71,7 +81,7 @@ const Index = () => {
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         agentEmotion={agent.emotion}
-        onAgentClick={() => setTimelineOpen(!timelineOpen)}
+        onAgentClick={() => setLivingPopupOpen(true)}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -79,7 +89,7 @@ const Index = () => {
           currentPage={page}
           agentEmotion={agent.emotion}
           onSearchOpen={() => {}}
-          onAgentClick={() => setTimelineOpen(!timelineOpen)}
+          onAgentClick={() => setLivingPopupOpen(true)}
         />
 
         <div className="flex-1 overflow-auto p-6">
@@ -87,12 +97,18 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Cognitive Timeline Panel */}
+      {/* Legacy Cognitive Timeline (still available via different trigger if needed) */}
       <CognitiveTimeline
         entries={agent.cognitiveTimeline}
-        open={timelineOpen}
-        onClose={() => setTimelineOpen(false)}
+        open={legacyTimelineOpen}
+        onClose={() => setLegacyTimelineOpen(false)}
         agentEmotion={agent.emotion}
+      />
+
+      {/* The Living Control Chamber - Agentic Popup */}
+      <AgentLivingPopup
+        open={livingPopupOpen}
+        onClose={() => setLivingPopupOpen(false)}
       />
     </div>
   );
