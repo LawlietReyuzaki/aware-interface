@@ -6,6 +6,7 @@ import { CognitiveTimeline } from '@/components/agent/CognitiveTimeline';
 import { AgentLivingPopup } from '@/components/agent/AgentLivingPopup';
 import { useAgentState } from '@/hooks/useAgentState';
 import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
+import { useBackgroundAgent } from '@/hooks/useBackgroundAgent';
 import DashboardPage from '@/pages/Dashboard';
 import ProjectsPage from '@/pages/ProjectsPage';
 import TasksPage from '@/pages/TasksPage';
@@ -27,6 +28,9 @@ const Index = () => {
 
   const agent = useAgentState();
   const { behavior } = useBehaviorTracking();
+  
+  // 🚀 Background Agent - Runs continuously from app start
+  const backgroundAgent = useBackgroundAgent();
 
   // Keyboard handlers
   useEffect(() => {
@@ -128,10 +132,11 @@ const Index = () => {
         agentEmotion={agent.emotion}
       />
 
-      {/* The Living Control Chamber - Agentic Popup */}
+      {/* The Living Control Chamber - View into the running agent */}
       <AgentLivingPopup
         open={livingPopupOpen}
         onClose={() => setLivingPopupOpen(false)}
+        backgroundAgent={backgroundAgent}
       />
     </div>
   );
