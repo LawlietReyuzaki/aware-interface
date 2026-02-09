@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import {
   Check, Flame, Target, Clock, FolderKanban, Zap, TrendingUp,
-  ArrowUpRight, ArrowDownRight, Heart, ListTodo, Bot
+  ArrowUpRight, ArrowDownRight, Heart, ListTodo, Bot, Loader2
 } from 'lucide-react';
 import { AnticipationLayer } from '@/components/agent/AnticipationLayer';
 import { AgentOrb } from '@/components/agent/AgentOrb';
+import { useDashboardData } from '@/hooks/useDashboardData';
 import type { AgentEmotion, AnticipationItem } from '@/hooks/useAgentState';
 import type { BehaviorState } from '@/hooks/useBehaviorTracking';
 
@@ -77,9 +78,34 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-  // Mock data
-  const mockScore = 73;
-  const streakDays = 12;
+  const { data, isLoading, error } = useDashboardData();
+
+  const score = data?.productivity_score ?? 0;
+  const streakDays = data?.streak_days ?? 0;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="flex items-center gap-2 text-muted-foreground"
+        >
+          <Loader2 size={16} className="animate-spin" />
+          <span className="font-mono text-sm">Loading dashboard...</span>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <p className="text-destructive font-mono text-sm mb-2">Failed to load dashboard</p>
+        <p className="text-xs text-muted-foreground">Make sure your backend is running on port 3847</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-[1200px]">
@@ -120,7 +146,7 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
               </div>
               <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mt-0.5">Day Streak</p>
             </div>
-            <ScoreRing score={mockScore} size={80} />
+            <ScoreRing score={score} size={80} />
           </div>
         </div>
       </motion.div>
@@ -130,10 +156,10 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
 
       {/* Stats Grid */}
       <div className="grid grid-cols-4 gap-3">
-        <StatCard label="Tasks Today" value={6} icon={Check} trend={15} color="hsl(var(--accent))" />
-        <StatCard label="Week Tasks" value={23} icon={ListTodo} trend={8} color="hsl(var(--primary))" />
-        <StatCard label="Goals Met" value="4/5" icon={Target} color="hsl(var(--agent-thinking))" />
-        <StatCard label="Check-ins" value={3} icon={Clock} color="hsl(var(--primary))" />
+        <StatCard label="Tasks Today" value={data?.tasks_today ?? 0} icon={Check} color="hsl(var(--accent))" />
+        <StatCard label="Week Tasks" value={data?.tasks_week ?? 0} icon={ListTodo} color="hsl(var(--primary))" />
+        <StatCard label="Goals Met" value={data?.goals_met ?? '0/0'} icon={Target} color="hsl(var(--agent-thinking))" />
+        <StatCard label="Check-ins" value={data?.health_checkins ?? 0} icon={Clock} color="hsl(var(--primary))" />
       </div>
 
       <div className="grid grid-cols-3 gap-5">
@@ -143,12 +169,7 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
             <FolderKanban size={15} className="text-primary" /> Active Projects
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            {[
-              { name: 'NEBUNEX Core', status: 'In Development', progress: 68, color: 'hsl(var(--primary))' },
-              { name: 'Client Portal', status: 'Production', progress: 92, color: 'hsl(var(--accent))' },
-              { name: 'AI Training Pipeline', status: 'Planning', progress: 25, color: 'hsl(var(--agent-thinking))' },
-              { name: 'Mobile App', status: 'Ideation', progress: 10, color: 'hsl(var(--muted-foreground))' },
-            ].map((p, i) => (
+            {(data?.projects ?? []).slice(0, 4).map((p, i) => (
               <motion.div
                 key={p.name}
                 initial={{ opacity: 0, y: 8 }}
@@ -159,13 +180,13 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
                 <div className="flex items-start justify-between mb-3">
                   <div
                     className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-display font-bold"
-                    style={{ background: `${p.color}15`, color: p.color }}
+                    style={{ background: `${p.color || 'hsl(var(--primary))'}15`, color: p.color || 'hsl(var(--primary))' }}
                   >
                     {p.name.slice(0, 2).toUpperCase()}
                   </div>
                   <span
-                    className="text-[10px] font-mono px-2 py-0.5 rounded-full"
-                    style={{ background: `${p.color}12`, color: p.color }}
+                    className="text-[10px] font-mono px-2 py-0.5 rounded-full capitalize"
+                    style={{ background: `${p.color || 'hsl(var(--primary))'}12`, color: p.color || 'hsl(var(--primary))' }}
                   >
                     {p.status}
                   </span>
@@ -175,7 +196,7 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
                   <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ background: p.color }}
+                      style={{ background: p.color || 'hsl(var(--primary))' }}
                       initial={{ width: 0 }}
                       animate={{ width: `${p.progress}%` }}
                       transition={{ duration: 1, delay: i * 0.1 }}
@@ -194,25 +215,19 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
             <Target size={15} className="text-agent-thinking" /> Today's Goals
           </h2>
           <div className="rounded-xl border border-border p-4 bg-card space-y-2.5">
-            {[
-              { title: 'Complete API integration', done: true },
-              { title: 'Review pull requests', done: true },
-              { title: 'Health check-in', done: false },
-              { title: 'Finance weekly review', done: false },
-              { title: 'Read 30 pages', done: false },
-            ].map((g, i) => (
-              <div key={i} className="flex items-center gap-3 py-1">
+            {(data?.goals ?? []).slice(0, 5).map((g, i) => (
+              <div key={g.id || i} className="flex items-center gap-3 py-1">
                 <div
                   className={`w-4.5 h-4.5 rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 transition-all ${
-                    g.done
+                    g.completed
                       ? 'bg-accent border-accent'
                       : 'border-muted-foreground/30 hover:border-primary'
                   }`}
                   style={{ width: 18, height: 18 }}
                 >
-                  {g.done && <Check size={10} className="text-background" />}
+                  {g.completed && <Check size={10} className="text-background" />}
                 </div>
-                <span className={`text-sm ${g.done ? 'line-through text-muted-foreground' : 'text-secondary-foreground'}`}>
+                <span className={`text-sm ${g.completed ? 'line-through text-muted-foreground' : 'text-secondary-foreground'}`}>
                   {g.title}
                 </span>
               </div>
