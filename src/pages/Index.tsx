@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { AppSidebar, type PageKey } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
+import { SearchDialog } from '@/components/layout/SearchDialog';
 import { CognitiveTimeline } from '@/components/agent/CognitiveTimeline';
 import { AgentLivingPopup } from '@/components/agent/AgentLivingPopup';
 import { useAgentState } from '@/hooks/useAgentState';
@@ -17,6 +18,7 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage';
 const Index = () => {
   const [page, setPage] = useState<PageKey>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [legacyTimelineOpen, setLegacyTimelineOpen] = useState(false);
   const [livingPopupOpen, setLivingPopupOpen] = useState(false);
 
@@ -27,8 +29,14 @@ const Index = () => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        setSearchOpen(false);
         setLegacyTimelineOpen(false);
         setLivingPopupOpen(false);
+      }
+      // Open search with Cmd/Ctrl + K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
       }
       // Open living popup with Cmd/Ctrl + .
       if ((e.metaKey || e.ctrlKey) && e.key === '.') {
@@ -90,7 +98,7 @@ const Index = () => {
         <AppHeader
           currentPage={page}
           agentEmotion={agent.emotion}
-          onSearchOpen={() => {}}
+          onSearchOpen={() => setSearchOpen(true)}
           onAgentClick={() => setLivingPopupOpen(true)}
         />
 
@@ -98,6 +106,16 @@ const Index = () => {
           {renderPage()}
         </div>
       </main>
+
+      {/* Search Dialog */}
+      <SearchDialog
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onNavigate={(p) => {
+          setPage(p);
+          setSearchOpen(false);
+        }}
+      />
 
       {/* Legacy Cognitive Timeline (still available via different trigger if needed) */}
       <CognitiveTimeline

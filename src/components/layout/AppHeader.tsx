@@ -1,5 +1,6 @@
-import { Search, Bell } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { AgentOrb } from '@/components/agent/AgentOrb';
+import { NotificationsDropdown } from './NotificationsDropdown';
 import type { AgentEmotion } from '@/hooks/useAgentState';
 import type { PageKey } from './AppSidebar';
 
@@ -42,10 +43,8 @@ export function AppHeader({ currentPage, agentEmotion, onSearchOpen, onAgentClic
           <kbd className="text-[10px] px-1.5 py-0.5 bg-muted rounded text-muted-foreground font-mono">⌘K</kbd>
         </button>
 
-        {/* Notifications */}
-        <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors relative">
-          <Bell size={17} />
-        </button>
+        {/* Notifications with dropdown */}
+        <NotificationsDropdown />
 
         {/* Agent state in header */}
         <div className="ml-1">
