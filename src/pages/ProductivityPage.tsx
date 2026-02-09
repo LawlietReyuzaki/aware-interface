@@ -65,8 +65,9 @@ export default function ProductivityPage() {
 
   const score = scoreQuery.data?.score ?? 0;
   const streak = streakQuery.data?.current_streak ?? 0;
-  const history = historyQuery.data ?? [];
-  const heatmap = heatmapQuery.data ?? [];
+  const history = Array.isArray(historyQuery.data) ? historyQuery.data : (historyQuery.data?.scores ?? []);
+  const heatmapRaw = heatmapQuery.data;
+  const heatmap = Array.isArray(heatmapRaw) ? heatmapRaw : (heatmapRaw?.data ?? heatmapRaw?.entries ?? []);
   const weekly = weeklyQuery.data;
 
   const handleCreateCheckin = () => {
