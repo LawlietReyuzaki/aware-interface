@@ -27,7 +27,7 @@ const pageTitles: Record<PageKey, string> = {
 
 export function AppHeader({ currentPage, agentEmotion, onSearchOpen, onAgentClick }: HeaderProps) {
   return (
-    <header className="h-14 flex items-center justify-between px-6 border-b border-border bg-background flex-shrink-0">
+    <header className="h-14 flex items-center justify-between px-6 border-b border-border bg-card flex-shrink-0">
       <h2 className="text-sm font-display font-semibold text-secondary-foreground">
         {pageTitles[currentPage]}
       </h2>
