@@ -10,6 +10,8 @@ import { AgentLivingPopup } from '@/components/agent/AgentLivingPopup';
 import { useAgentState } from '@/hooks/useAgentState';
 import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 import DashboardPage from '@/pages/Dashboard';
+import ProjectsPage from '@/pages/ProjectsPage';
+import TasksPage from '@/pages/TasksPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
 
 const Index = () => {
@@ -49,9 +51,9 @@ const Index = () => {
           />
         );
       case 'projects':
-        return <PlaceholderPage title="Projects" icon={FolderKanban} description="Manage your projects, track progress, and monitor health scores across all your work." />;
+        return <ProjectsPage />;
       case 'tasks':
-        return <PlaceholderPage title="Tasks" icon={ListTodo} description="Kanban board with drag-and-drop, priority levels, and project-linked task management." />;
+        return <TasksPage />;
       case 'productivity':
         return <PlaceholderPage title="Productivity" icon={TrendingUp} description="Daily scores, streak tracking, contribution heatmaps, and weekly reports." />;
       case 'health':

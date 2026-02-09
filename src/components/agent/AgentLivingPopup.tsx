@@ -5,6 +5,7 @@ import { AgentPresenceCore, type AgentState } from './AgentPresenceCore';
 import { TimeFlowRing } from './TimeFlowRing';
 import { CognitiveStream, type CognitiveThought } from './CognitiveStream';
 import { InterventionLayer } from './InterventionLayer';
+import { useAgentApi } from '@/hooks/useAgentApi';
 
 interface AgentLivingPopupProps {
   open: boolean;
@@ -28,13 +29,28 @@ const COGNITIVE_THOUGHTS: Omit<CognitiveThought, 'id' | 'timestamp'>[] = [
 ];
 
 export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
+  // Real API data
+  const { agentState: apiState, thoughts: apiThoughts, isLoading } = useAgentApi();
+  
   const [agentState, setAgentState] = useState<AgentState>('idle');
   const [thoughts, setThoughts] = useState<CognitiveThought[]>([]);
   const [interventionActive, setInterventionActive] = useState(false);
   const [interventionMessage, setInterventionMessage] = useState('');
-  const [stateIndex, setStateIndex] = useState(0);
-  const [thoughtIndex, setThoughtIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // Sync API state to local state
+  useEffect(() => {
+    if (apiState && apiState !== agentState) {
+      setAgentState(apiState);
+    }
+  }, [apiState]);
+
+  // Merge API thoughts with local state
+  useEffect(() => {
+    if (apiThoughts.length > 0) {
+      setThoughts(apiThoughts);
+    }
+  }, [apiThoughts]);
 
   // Time events for the ring
   const timeEvents = useMemo(() => [
@@ -46,50 +62,38 @@ export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
     { id: '6', label: 'Finance review', minutesFromNow: 90, type: 'future' as const, importance: 'low' as const },
   ], []);
 
-  // Simulate agent state transitions
+  // Fallback: simulate agent state transitions if API isn't returning data
   useEffect(() => {
-    if (!open) return;
+    if (!open || apiThoughts.length > 0) return;
 
-    const interval = setInterval(() => {
-      setStateIndex((prev) => (prev + 1) % AGENT_STATES.length);
-    }, 6000);
+    // Only simulate if no real data
+    const FALLBACK_THOUGHTS: Omit<CognitiveThought, 'id' | 'timestamp'>[] = [
+      { text: 'Session initialized. Loading context from last activity...', type: 'observation' },
+      { text: 'Task deadline approaching in 2 hours', type: 'observation' },
+      { text: 'Evaluating priority against current focus state', type: 'evaluation' },
+      { text: 'User appears to be in productive flow', type: 'observation' },
+      { text: 'Deferring interruption — focus preservation takes priority', type: 'decision' },
+    ];
 
-    return () => clearInterval(interval);
-  }, [open]);
-
-  useEffect(() => {
-    setAgentState(AGENT_STATES[stateIndex]);
-  }, [stateIndex]);
-
-  // Simulate cognitive thoughts appearing
-  useEffect(() => {
-    if (!open) return;
-
-    // Add initial thoughts
-    const initialThoughts = COGNITIVE_THOUGHTS.slice(0, 3).map((t, i) => ({
+    const initialThoughts = FALLBACK_THOUGHTS.slice(0, 3).map((t, i) => ({
       ...t,
       id: `initial-${i}`,
       timestamp: new Date(Date.now() - (3 - i) * 20000),
     }));
     setThoughts(initialThoughts);
-    setThoughtIndex(3);
 
+    let idx = 3;
     const interval = setInterval(() => {
-      setThoughtIndex((prev) => {
-        const nextIdx = prev % COGNITIVE_THOUGHTS.length;
-        const thought = COGNITIVE_THOUGHTS[nextIdx];
-        
-        setThoughts((prevThoughts) => [
-          { ...thought, id: `thought-${Date.now()}`, timestamp: new Date() },
-          ...prevThoughts,
-        ].slice(0, 12));
-
-        return prev + 1;
-      });
+      const thought = FALLBACK_THOUGHTS[idx % FALLBACK_THOUGHTS.length];
+      setThoughts((prev) => [
+        { ...thought, id: `thought-${Date.now()}`, timestamp: new Date() },
+        ...prev,
+      ].slice(0, 12));
+      idx++;
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [open]);
+  }, [open, apiThoughts.length]);
 
   // Elapsed time counter
   useEffect(() => {
