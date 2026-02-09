@@ -13,6 +13,7 @@ import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
 import DashboardPage from '@/pages/Dashboard';
 import ProjectsPage from '@/pages/ProjectsPage';
 import TasksPage from '@/pages/TasksPage';
+import AIChatPage from '@/pages/AIChatPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
 
 const Index = () => {
@@ -75,7 +76,7 @@ const Index = () => {
       case 'freelance':
         return <PlaceholderPage title="Freelance" icon={Users} description="Client management, earnings tracking, and platform-specific analytics." />;
       case 'ai_chat':
-        return <PlaceholderPage title="AI Intelligence" icon={Bot} description="Conversational AI assistant with context-aware analysis across all your data." />;
+        return <AIChatPage />;
       case 'settings':
         return <PlaceholderPage title="Settings" icon={Settings} description="Profile, working hours, data export/import, and system configuration." />;
       default:
