@@ -1,0 +1,3279 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    NEBUNEX FRONTEND - COMPLETE FILE CONTENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+# Generated: 2026-02-09
+# Total Files Documented: 30+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONFIGURATION FILES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: vite.config.ts
+================================================================================
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
+
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8080,
+    hmr: {
+      overlay: false,
+    },
+    proxy: {
+      "/api": {
+        target: "http://localhost:3847",
+        changeOrigin: true,
+      },
+    },
+  },
+  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+}));
+
+
+================================================================================
+FILE: tailwind.config.ts
+================================================================================
+import type { Config } from "tailwindcss";
+
+export default {
+  darkMode: ["class"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Space Grotesk", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+        agent: {
+          calm: "hsl(var(--agent-calm))",
+          thinking: "hsl(var(--agent-thinking))",
+          concerned: "hsl(var(--agent-concerned))",
+          firm: "hsl(var(--agent-firm))",
+          success: "hsl(var(--agent-success))",
+        },
+        surface: {
+          elevated: "hsl(var(--surface-elevated))",
+          sunken: "hsl(var(--surface-sunken))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config;
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CORE APPLICATION FILES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: src/main.tsx
+================================================================================
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+
+createRoot(document.getElementById("root")!).render(<App />);
+
+
+================================================================================
+FILE: src/App.tsx
+================================================================================
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;
+
+
+================================================================================
+FILE: src/index.css
+================================================================================
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 25% 4%;
+    --foreground: 210 20% 90%;
+
+    --card: 222 22% 6.5%;
+    --card-foreground: 210 20% 90%;
+
+    --popover: 222 22% 6.5%;
+    --popover-foreground: 210 20% 90%;
+
+    --primary: 200 70% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 18% 11%;
+    --secondary-foreground: 210 15% 75%;
+
+    --muted: 220 18% 13%;
+    --muted-foreground: 215 15% 50%;
+
+    --accent: 160 55% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 18% 13%;
+    --input: 220 18% 11%;
+    --ring: 200 70% 50%;
+
+    --radius: 0.75rem;
+
+    /* Agent State Colors */
+    --agent-calm: 200 70% 50%;
+    --agent-thinking: 38 92% 55%;
+    --agent-concerned: 12 80% 58%;
+    --agent-firm: 220 15% 72%;
+    --agent-success: 160 55% 42%;
+
+    /* Semantic surfaces */
+    --surface-elevated: 222 20% 9%;
+    --surface-sunken: 222 28% 3%;
+
+    /* Glow effects */
+    --glow-calm: 200 70% 50%;
+    --glow-thinking: 38 92% 55%;
+    --glow-concerned: 12 80% 58%;
+
+    --sidebar-background: 222 28% 3%;
+    --sidebar-foreground: 210 15% 65%;
+    --sidebar-primary: 200 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 18% 11%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 220 18% 10%;
+    --sidebar-ring: 200 70% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(220 18% 18%); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(220 18% 25%); }
+}
+
+@layer components {
+  .agent-breathe { animation: breathe 4s ease-in-out infinite; }
+  .agent-think { animation: think 1.5s ease-in-out infinite; }
+  .agent-concern { animation: concern 2s ease-in-out infinite; }
+  .agent-firm { animation: firm 0.8s ease-in-out infinite; }
+  .anticipate-enter { animation: anticipateIn 1.2s ease-out forwards; }
+  .soft-friction { transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1); }
+  .soft-friction:active { transform: scale(0.97); transition: all 0.15s ease; }
+
+  .timeline-connector { @apply relative; }
+  .timeline-connector::before {
+    content: '';
+    @apply absolute left-[11px] top-8 bottom-0 w-px;
+    background: linear-gradient(to bottom, hsl(var(--border)) 0%, transparent 100%);
+  }
+
+  .living-surface {
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--surface-elevated)) 50%, hsl(var(--card)) 100%);
+    background-size: 200% 200%;
+    animation: livingShift 8s ease-in-out infinite;
+  }
+
+  .flow-mode .non-essential { opacity: 0.3; transition: opacity 1.5s ease; }
+  .flow-mode .non-essential:hover { opacity: 1; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes think {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  25% { transform: scale(1.05) rotate(1deg); }
+  50% { transform: scale(0.98); opacity: 1; }
+  75% { transform: scale(1.03) rotate(-1deg); }
+}
+
+@keyframes concern {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px hsl(var(--agent-concerned) / 0.15); }
+  50% { transform: scale(1.03); box-shadow: 0 0 35px hsl(var(--agent-concerned) / 0.3); }
+}
+
+@keyframes firm {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes anticipateIn {
+  0% { opacity: 0; transform: translateY(6px) scale(0.98); filter: blur(4px); }
+  60% { opacity: 0.5; filter: blur(1px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes livingShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.slide-in-right { animation: slideInRight 0.3s ease-out forwards; }
+.pulse-subtle { animation: pulseSubtle 2s ease-in-out infinite; }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SERVICES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: src/services/api.ts
+================================================================================
+const BASE = import.meta.env.VITE_API_BASE ?? '/api';
+
+async function request(path: string, options?: RequestInit) {
+  const res = await fetch(`${BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || 'Request failed');
+  }
+  return res.json();
+}
+
+export const api = {
+  dashboard: () => request('/dashboard'),
+
+  projects: {
+    list: (status?: string) => request(`/projects${status ? `?status=${status}` : ''}`),
+    get: (id: string) => request(`/projects/${id}`),
+    create: (data: any) => request('/projects', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => request(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => request(`/projects/${id}`, { method: 'DELETE' }),
+  },
+
+  tasks: {
+    list: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request(`/tasks${q}`);
+    },
+    kanban: (projectId?: string) => request(`/tasks/kanban${projectId ? `?project_id=${projectId}` : ''}`),
+    create: (data: any) => request('/tasks', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) => request(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    move: (id: string, status: string, order: number = 0) =>
+      request(`/tasks/${id}/move?status=${status}&sort_order=${order}`, { method: 'PUT' }),
+    delete: (id: string) => request(`/tasks/${id}`, { method: 'DELETE' }),
+    goals: {
+      list: (date?: string) => request(`/tasks/daily/goals${date ? `?date=${date}` : ''}`),
+      create: (data: any) => request('/tasks/daily/goals', { method: 'POST', body: JSON.stringify(data) }),
+      toggle: (id: string) => request(`/tasks/daily/goals/${id}/toggle`, { method: 'PUT' }),
+    },
+  },
+
+  productivity: {
+    todayScore: () => request('/productivity/score/today'),
+    history: (days?: number) => request(`/productivity/scores/history${days ? `?days=${days}` : ''}`),
+    streak: () => request('/productivity/streak'),
+    heatmap: () => request('/productivity/heatmap'),
+    weeklyReport: () => request('/productivity/weekly-report'),
+  },
+
+  health: {
+    summary: () => request('/health/summary'),
+    mental: () => request('/health/mental'),
+    createMental: (data: any) => request('/health/mental', { method: 'POST', body: JSON.stringify(data) }),
+    createWorkout: (data: any) => request('/health/workouts', { method: 'POST', body: JSON.stringify(data) }),
+  },
+
+  finances: {
+    transactions: (params?: Record<string, string>) => {
+      const q = params ? '?' + new URLSearchParams(params).toString() : '';
+      return request(`/finances/transactions${q}`);
+    },
+    createTransaction: (data: any) => request('/finances/transactions', { method: 'POST', body: JSON.stringify(data) }),
+    summary: (days?: number) => request(`/finances/summary${days ? `?days=${days}` : ''}`),
+    budgets: () => request('/finances/budgets'),
+  },
+
+  knowledge: {
+    bookmarks: () => request('/knowledge/bookmarks'),
+    reading: () => request('/knowledge/reading'),
+    stats: () => request('/knowledge/stats'),
+  },
+
+  vault: {
+    list: () => request('/vault'),
+    create: (data: any) => request('/vault', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request(`/vault/${id}`, { method: 'DELETE' }),
+    stats: () => request('/vault/stats/summary'),
+    generatePassword: (length: number = 20) => request(`/vault/generate-password?length=${length}`, { method: 'POST' }),
+  },
+
+  freelance: {
+    clients: () => request('/freelance/clients'),
+    stats: () => request('/freelance/stats'),
+  },
+
+  ai: {
+    chat: (message: string, context?: any) => request('/ai/chat', { method: 'POST', body: JSON.stringify({ message, context }) }),
+  },
+
+  agent: {
+    chat: (message: string, conversationId?: string) => request('/agent/chat', { method: 'POST', body: JSON.stringify({ message, conversation_id: conversationId || null }) }),
+    status: () => request('/agent/status'),
+  },
+
+  search: {
+    query: (q: string) => request(`/search?q=${encodeURIComponent(q)}`),
+  },
+
+  notifications: {
+    list: (unreadOnly?: boolean) => request(`/notifications${unreadOnly ? '?unread_only=true' : ''}`),
+    count: () => request('/notifications/count'),
+    markRead: (id: string) => request(`/notifications/${id}/read`, { method: 'PUT' }),
+    markAllRead: () => request('/notifications/read-all', { method: 'PUT' }),
+    clearRead: () => request('/notifications', { method: 'DELETE' }),
+    generate: () => request('/notifications/generate', { method: 'POST' }),
+  },
+
+  activity: {
+    status: () => request('/activity/status'),
+    timeline: (limit?: number) => request(`/activity/timeline?limit=${limit || 50}`),
+    timelineSince: (timestamp: string) => request(`/activity/timeline/since/${encodeURIComponent(timestamp)}`),
+    clearTimeline: () => request('/activity/timeline', { method: 'DELETE' }),
+    textRespond: (text: string) => request('/activity/voice/text-respond', { method: 'POST', body: JSON.stringify({ text }) }),
+  },
+
+  users: {
+    me: () => request('/users/me'),
+    update: (data: any) => request('/users/me', { method: 'PUT', body: JSON.stringify(data) }),
+  },
+
+  data: {
+    export: () => request('/data/export'),
+    exportModule: (module: string) => request(`/data/export/${module}`),
+    stats: () => request('/data/stats'),
+  },
+};
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PAGES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: src/pages/Index.tsx
+================================================================================
+import { useState, useEffect } from 'react';
+import {
+  FolderKanban, ListTodo, TrendingUp, Heart, Wallet,
+  BookOpen, Shield, Users, Bot, Settings,
+} from 'lucide-react';
+import { AppSidebar, type PageKey } from '@/components/layout/AppSidebar';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { CognitiveTimeline } from '@/components/agent/CognitiveTimeline';
+import { AgentLivingPopup } from '@/components/agent/AgentLivingPopup';
+import { useAgentState } from '@/hooks/useAgentState';
+import { useBehaviorTracking } from '@/hooks/useBehaviorTracking';
+import DashboardPage from '@/pages/Dashboard';
+import ProjectsPage from '@/pages/ProjectsPage';
+import TasksPage from '@/pages/TasksPage';
+import { PlaceholderPage } from '@/pages/PlaceholderPage';
+
+const Index = () => {
+  const [page, setPage] = useState<PageKey>('dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [legacyTimelineOpen, setLegacyTimelineOpen] = useState(false);
+  const [livingPopupOpen, setLivingPopupOpen] = useState(false);
+
+  const agent = useAgentState();
+  const { behavior } = useBehaviorTracking();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setLegacyTimelineOpen(false);
+        setLivingPopupOpen(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === '.') {
+        e.preventDefault();
+        setLivingPopupOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  const renderPage = () => {
+    switch (page) {
+      case 'dashboard':
+        return (
+          <DashboardPage
+            agentEmotion={agent.emotion}
+            anticipations={agent.anticipations}
+            behavior={behavior}
+          />
+        );
+      case 'projects':
+        return <ProjectsPage />;
+      case 'tasks':
+        return <TasksPage />;
+      case 'productivity':
+        return <PlaceholderPage title="Productivity" icon={TrendingUp} description="Daily scores, streak tracking, contribution heatmaps, and weekly reports." />;
+      case 'health':
+        return <PlaceholderPage title="Wellness" icon={Heart} description="Mental health check-ins, workout logging, nutrition tracking, and vitals monitoring." />;
+      case 'finances':
+        return <PlaceholderPage title="Finances" icon={Wallet} description="Transaction tracking, budget management, spending analytics, and savings insights." />;
+      case 'knowledge':
+        return <PlaceholderPage title="Knowledge" icon={BookOpen} description="Bookmarks, reading lists, learning progress, and curated knowledge base." />;
+      case 'vault':
+        return <PlaceholderPage title="Vault" icon={Shield} description="Encrypted credential storage, password generation, and security scoring." />;
+      case 'freelance':
+        return <PlaceholderPage title="Freelance" icon={Users} description="Client management, earnings tracking, and platform-specific analytics." />;
+      case 'ai_chat':
+        return <PlaceholderPage title="AI Intelligence" icon={Bot} description="Conversational AI assistant with context-aware analysis across all your data." />;
+      case 'settings':
+        return <PlaceholderPage title="Settings" icon={Settings} description="Profile, working hours, data export/import, and system configuration." />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={`flex h-screen overflow-hidden bg-background ${behavior.isInFlow ? 'flow-mode' : ''}`}>
+      <AppSidebar
+        currentPage={page}
+        onNavigate={setPage}
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        agentEmotion={agent.emotion}
+        onAgentClick={() => setLivingPopupOpen(true)}
+      />
+
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <AppHeader
+          currentPage={page}
+          agentEmotion={agent.emotion}
+          onSearchOpen={() => {}}
+          onAgentClick={() => setLivingPopupOpen(true)}
+        />
+
+        <div className="flex-1 overflow-auto p-6">
+          {renderPage()}
+        </div>
+      </main>
+
+      <CognitiveTimeline
+        entries={agent.cognitiveTimeline}
+        open={legacyTimelineOpen}
+        onClose={() => setLegacyTimelineOpen(false)}
+        agentEmotion={agent.emotion}
+      />
+
+      <AgentLivingPopup
+        open={livingPopupOpen}
+        onClose={() => setLivingPopupOpen(false)}
+      />
+    </div>
+  );
+};
+
+export default Index;
+
+
+================================================================================
+FILE: src/pages/Dashboard.tsx
+================================================================================
+import { motion } from 'framer-motion';
+import {
+  Check, Flame, Target, Clock, FolderKanban, Zap, TrendingUp,
+  ArrowUpRight, ArrowDownRight, Heart, ListTodo, Bot, Loader2
+} from 'lucide-react';
+import { AnticipationLayer } from '@/components/agent/AnticipationLayer';
+import { AgentOrb } from '@/components/agent/AgentOrb';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import type { AgentEmotion, AnticipationItem } from '@/hooks/useAgentState';
+import type { BehaviorState } from '@/hooks/useBehaviorTracking';
+
+interface DashboardProps {
+  agentEmotion: AgentEmotion;
+  anticipations: AnticipationItem[];
+  behavior: BehaviorState;
+}
+
+function ScoreRing({ score, size = 100 }: { score: number; size?: number }) {
+  const r = (size - 10) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (score / 100) * c;
+  const color = score >= 70 ? 'hsl(var(--accent))' : score >= 40 ? 'hsl(var(--agent-thinking))' : 'hsl(var(--destructive))';
+
+  return (
+    <svg width={size} height={size} className="transform -rotate-90">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
+      <motion.circle
+        cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="6"
+        strokeDasharray={c}
+        initial={{ strokeDashoffset: c }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
+        strokeLinecap="round"
+      />
+      <text
+        x="50%" y="50%" textAnchor="middle" dominantBaseline="central"
+        fill={color} fontSize={size * 0.28} fontWeight="bold" fontFamily="Space Grotesk"
+        transform={`rotate(90 ${size / 2} ${size / 2})`}
+      >
+        {Math.round(score)}
+      </text>
+    </svg>
+  );
+}
+
+function StatCard({ label, value, icon: Icon, trend, color }: {
+  label: string; value: string | number; icon: any; trend?: number; color: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="rounded-xl border border-border p-4 bg-card"
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1.5">{label}</p>
+          <p className="text-xl font-display font-bold" style={{ color }}>{value}</p>
+          {trend !== undefined && (
+            <div className={`flex items-center gap-1 mt-1 text-xs ${trend >= 0 ? 'text-accent' : 'text-destructive'}`}>
+              {trend >= 0 ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
+              <span className="font-mono">{Math.abs(trend)}%</span>
+            </div>
+          )}
+        </div>
+        <div className="p-2 rounded-lg" style={{ background: `${color}12` }}>
+          <Icon size={17} style={{ color }} />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function DashboardPage({ agentEmotion, anticipations, behavior }: DashboardProps) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  const { data, isLoading, error } = useDashboardData();
+
+  const score = data?.productivity_score ?? 0;
+  const streakDays = data?.streak_days ?? 0;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="flex items-center gap-2 text-muted-foreground"
+        >
+          <Loader2 size={16} className="animate-spin" />
+          <span className="font-mono text-sm">Loading dashboard...</span>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <p className="text-destructive font-mono text-sm mb-2">Failed to load dashboard</p>
+        <p className="text-xs text-muted-foreground">Make sure your backend is running on port 3847</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-[1200px]">
+      {/* Hero — Greeting + Agent Presence */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="rounded-2xl border border-border p-6 living-surface"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-display font-bold text-foreground mb-1">
+              {greeting} <span className="text-primary">⚡</span>
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {behavior.isInFlow
+                ? 'You\'re in deep focus. I\'ll keep things quiet.'
+                : behavior.sessionMood === 'productive'
+                  ? 'Strong session. Your systems are aligned.'
+                  : 'Ready when you are. Let\'s build something.'}
+            </p>
+            {behavior.isInFlow && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xs text-accent mt-2 font-mono"
+              >
+                ● Flow state — {behavior.focusDuration}m focused
+              </motion.p>
+            )}
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <div className="flex items-center gap-1.5 text-agent-thinking">
+                <Flame size={16} />
+                <span className="text-xl font-display font-bold">{streakDays}</span>
+              </div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mt-0.5">Day Streak</p>
+            </div>
+            <ScoreRing score={score} size={80} />
+          </div>
+        </div>
+      </motion.div>
+
+      <AnticipationLayer items={anticipations} />
+
+      <div className="grid grid-cols-4 gap-3">
+        <StatCard label="Tasks Today" value={data?.tasks_today ?? 0} icon={Check} color="hsl(var(--accent))" />
+        <StatCard label="Week Tasks" value={data?.tasks_week ?? 0} icon={ListTodo} color="hsl(var(--primary))" />
+        <StatCard label="Goals Met" value={data?.goals_met ?? '0/0'} icon={Target} color="hsl(var(--agent-thinking))" />
+        <StatCard label="Check-ins" value={data?.health_checkins ?? 0} icon={Clock} color="hsl(var(--primary))" />
+      </div>
+
+      <div className="grid grid-cols-3 gap-5">
+        <div className="col-span-2 space-y-4">
+          <h2 className="text-sm font-display font-semibold text-secondary-foreground flex items-center gap-2">
+            <FolderKanban size={15} className="text-primary" /> Active Projects
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {(data?.projects ?? []).slice(0, 4).map((p, i) => (
+              <motion.div
+                key={p.name}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="rounded-xl border border-border p-4 bg-card hover:border-muted-foreground/20 transition-colors cursor-pointer"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-display font-bold"
+                    style={{ background: `${p.color || 'hsl(var(--primary))'}15`, color: p.color || 'hsl(var(--primary))' }}
+                  >
+                    {p.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <span
+                    className="text-[10px] font-mono px-2 py-0.5 rounded-full capitalize"
+                    style={{ background: `${p.color || 'hsl(var(--primary))'}12`, color: p.color || 'hsl(var(--primary))' }}
+                  >
+                    {p.status}
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold text-foreground mb-2 truncate">{p.name}</h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: p.color || 'hsl(var(--primary))' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${p.progress}%` }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">{p.progress}%</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-sm font-display font-semibold text-secondary-foreground flex items-center gap-2">
+            <Target size={15} className="text-agent-thinking" /> Today's Goals
+          </h2>
+          <div className="rounded-xl border border-border p-4 bg-card space-y-2.5">
+            {(data?.goals ?? []).slice(0, 5).map((g, i) => (
+              <div key={g.id || i} className="flex items-center gap-3 py-1">
+                <div
+                  className={`w-4.5 h-4.5 rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 transition-all ${
+                    g.completed
+                      ? 'bg-accent border-accent'
+                      : 'border-muted-foreground/30 hover:border-primary'
+                  }`}
+                  style={{ width: 18, height: 18 }}
+                >
+                  {g.completed && <Check size={10} className="text-background" />}
+                </div>
+                <span className={`text-sm ${g.completed ? 'line-through text-muted-foreground' : 'text-secondary-foreground'}`}>
+                  {g.title}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <h2 className="text-sm font-display font-semibold text-secondary-foreground flex items-center gap-2 pt-2">
+            <Bot size={15} className="text-primary" /> AI Insights
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: 'Productivity', icon: TrendingUp, color: 'hsl(var(--primary))' },
+              { label: 'Daily Plan', icon: Target, color: 'hsl(var(--accent))' },
+              { label: 'Health', icon: Heart, color: 'hsl(var(--agent-concerned))' },
+              { label: 'Finance', icon: Zap, color: 'hsl(var(--agent-thinking))' },
+            ].map((a) => (
+              <button
+                key={a.label}
+                className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors text-left"
+              >
+                <a.icon size={13} style={{ color: a.color }} />
+                <span className="text-xs text-secondary-foreground">{a.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-border p-4 bg-card mt-4">
+            <div className="flex items-center gap-3">
+              <AgentOrb emotion={agentEmotion} size="md" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground font-mono">Agent Status</p>
+                <p className="text-sm text-secondary-foreground capitalize">{agentEmotion}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/pages/ProjectsPage.tsx
+================================================================================
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, FolderKanban, MoreHorizontal, Trash2, Edit2, ExternalLink } from 'lucide-react';
+import { api } from '@/services/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  progress: number;
+  color?: string;
+  health_score?: number;
+  created_at?: string;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  ideation: 'hsl(var(--muted-foreground))',
+  planning: 'hsl(var(--agent-thinking))',
+  'in-development': 'hsl(var(--primary))',
+  production: 'hsl(var(--accent))',
+  archived: 'hsl(var(--muted-foreground))',
+};
+
+export default function ProjectsPage() {
+  const queryClient = useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newProject, setNewProject] = useState({ name: '', description: '' });
+
+  const { data: projects, isLoading } = useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: () => api.projects.list(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: { name: string; description: string }) => api.projects.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setCreateOpen(false);
+      setNewProject({ name: '', description: '' });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.projects.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="text-muted-foreground font-mono text-sm"
+        >
+          Loading projects...
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-[1200px]">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+            <FolderKanban size={24} className="text-primary" />
+            Projects
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {projects?.length ?? 0} projects tracked
+          </p>
+        </div>
+
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-2">
+              <Plus size={14} />
+              New Project
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <Input
+                placeholder="Project name"
+                value={newProject.name}
+                onChange={(e) => setNewProject((p) => ({ ...p, name: e.target.value }))}
+              />
+              <Textarea
+                placeholder="Description (optional)"
+                value={newProject.description}
+                onChange={(e) => setNewProject((p) => ({ ...p, description: e.target.value }))}
+              />
+              <Button
+                className="w-full"
+                onClick={() => createMutation.mutate(newProject)}
+                disabled={!newProject.name.trim() || createMutation.isPending}
+              >
+                {createMutation.isPending ? 'Creating...' : 'Create Project'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {!projects?.length ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center py-20"
+        >
+          <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 mb-4">
+            <FolderKanban size={32} className="text-primary" />
+          </div>
+          <p className="text-muted-foreground text-sm">No projects yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Create your first project to get started</p>
+        </motion.div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          <AnimatePresence mode="popLayout">
+            {projects.map((project, i) => {
+              const color = project.color || STATUS_COLORS[project.status] || 'hsl(var(--primary))';
+              return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="rounded-xl border border-border p-5 bg-card hover:border-muted-foreground/20 transition-colors group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-display font-bold"
+                      style={{ background: `${color}15`, color }}
+                    >
+                      {project.name.slice(0, 2).toUpperCase()}
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-secondary/80 transition-all">
+                          <MoreHorizontal size={14} className="text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem className="gap-2">
+                          <Edit2 size={12} /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="gap-2">
+                          <ExternalLink size={12} /> Open
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="gap-2 text-destructive"
+                          onClick={() => deleteMutation.mutate(project.id)}
+                        >
+                          <Trash2 size={12} /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <h3 className="text-sm font-semibold text-foreground mb-1 truncate">{project.name}</h3>
+                  {project.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
+                  )}
+
+                  <div className="flex items-center justify-between mb-2">
+                    <span
+                      className="text-[10px] font-mono px-2 py-0.5 rounded-full capitalize"
+                      style={{ background: `${color}12`, color }}
+                    >
+                      {project.status.replace('-', ' ')}
+                    </span>
+                    {project.health_score !== undefined && (
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        Health: {project.health_score}%
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: color }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${project.progress}%` }}
+                        transition={{ duration: 0.8, delay: i * 0.05 }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground">{project.progress}%</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/pages/TasksPage.tsx
+================================================================================
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { Plus, ListTodo, GripVertical, Trash2, Circle, CheckCircle2 } from 'lucide-react';
+import { api } from '@/services/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  project_id?: string;
+  sort_order: number;
+}
+
+interface KanbanData {
+  todo: Task[];
+  in_progress: Task[];
+  done: Task[];
+}
+
+const COLUMNS = [
+  { key: 'todo', label: 'To Do', color: 'hsl(var(--muted-foreground))' },
+  { key: 'in_progress', label: 'In Progress', color: 'hsl(var(--agent-thinking))' },
+  { key: 'done', label: 'Done', color: 'hsl(var(--accent))' },
+] as const;
+
+const PRIORITY_COLORS: Record<string, string> = {
+  low: 'hsl(var(--muted-foreground))',
+  medium: 'hsl(var(--agent-thinking))',
+  high: 'hsl(var(--agent-concerned))',
+  critical: 'hsl(var(--destructive))',
+};
+
+export default function TasksPage() {
+  const queryClient = useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', priority: 'medium' });
+
+  const { data: kanban, isLoading } = useQuery<KanbanData>({
+    queryKey: ['tasks', 'kanban'],
+    queryFn: () => api.tasks.kanban(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: { title: string; priority: string }) =>
+      api.tasks.create({ ...data, status: 'todo' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      setCreateOpen(false);
+      setNewTask({ title: '', priority: 'medium' });
+    },
+  });
+
+  const moveMutation = useMutation({
+    mutationFn: ({ id, status, order }: { id: string; status: string; order: number }) =>
+      api.tasks.move(id, status, order),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.tasks.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+  });
+
+  const handleDrop = (taskId: string, newStatus: string, newOrder: number) => {
+    moveMutation.mutate({ id: taskId, status: newStatus, order: newOrder });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="text-muted-foreground font-mono text-sm"
+        >
+          Loading tasks...
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 h-full">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+            <ListTodo size={24} className="text-primary" />
+            Tasks
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Drag and drop to organize your work
+          </p>
+        </div>
+
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-2">
+              <Plus size={14} />
+              New Task
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Task</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <Input
+                placeholder="Task title"
+                value={newTask.title}
+                onChange={(e) => setNewTask((t) => ({ ...t, title: e.target.value }))}
+              />
+              <Select
+                value={newTask.priority}
+                onValueChange={(v) => setNewTask((t) => ({ ...t, priority: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                className="w-full"
+                onClick={() => createMutation.mutate(newTask)}
+                disabled={!newTask.title.trim() || createMutation.isPending}
+              >
+                {createMutation.isPending ? 'Creating...' : 'Create Task'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 h-[calc(100vh-200px)]">
+        {COLUMNS.map((column) => {
+          const tasks = kanban?.[column.key as keyof KanbanData] ?? [];
+          return (
+            <div
+              key={column.key}
+              className="rounded-xl border border-border bg-card/50 flex flex-col overflow-hidden"
+            >
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: column.color }}
+                  />
+                  <span className="text-sm font-semibold text-foreground">{column.label}</span>
+                </div>
+                <span className="text-xs font-mono text-muted-foreground">{tasks.length}</span>
+              </div>
+
+              <div className="flex-1 p-3 space-y-2 overflow-y-auto">
+                <AnimatePresence mode="popLayout">
+                  {tasks.map((task, i) => (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: i * 0.03 }}
+                      layout
+                      className="rounded-lg border border-border bg-card p-3 group cursor-grab active:cursor-grabbing hover:border-muted-foreground/30 transition-colors"
+                      draggable
+                      onDragEnd={(e, info) => {}}
+                    >
+                      <div className="flex items-start gap-2">
+                        <button
+                          className="mt-0.5 text-muted-foreground hover:text-accent transition-colors"
+                          onClick={() => {
+                            if (column.key !== 'done') {
+                              handleDrop(task.id, 'done', 0);
+                            }
+                          }}
+                        >
+                          {column.key === 'done' ? (
+                            <CheckCircle2 size={14} className="text-accent" />
+                          ) : (
+                            <Circle size={14} />
+                          )}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm ${column.key === 'done' ? 'line-through text-muted-foreground' : 'text-foreground'}`}
+                          >
+                            {task.title}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span
+                              className="text-[9px] font-mono px-1.5 py-0.5 rounded capitalize"
+                              style={{
+                                background: `${PRIORITY_COLORS[task.priority] || 'hsl(var(--muted))'}15`,
+                                color: PRIORITY_COLORS[task.priority] || 'hsl(var(--muted-foreground))',
+                              }}
+                            >
+                              {task.priority}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                          onClick={() => deleteMutation.mutate(task.id)}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+
+                {!tasks.length && (
+                  <div className="flex items-center justify-center py-8 text-xs text-muted-foreground">
+                    No tasks
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/pages/PlaceholderPage.tsx
+================================================================================
+import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
+
+interface PlaceholderPageProps {
+  title: string;
+  icon: any;
+  description: string;
+  children?: ReactNode;
+}
+
+export function PlaceholderPage({ title, icon: Icon, description }: PlaceholderPageProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col items-center justify-center min-h-[60vh]"
+    >
+      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 mb-6">
+        <Icon size={32} className="text-primary" />
+      </div>
+      <h1 className="text-2xl font-display font-bold text-foreground mb-2">{title}</h1>
+      <p className="text-sm text-muted-foreground max-w-md text-center leading-relaxed">
+        {description}
+      </p>
+      <p className="text-xs font-mono text-muted-foreground mt-6 border border-border rounded-lg px-4 py-2">
+        Connect your backend to populate this page
+      </p>
+    </motion.div>
+  );
+}
+
+
+================================================================================
+FILE: src/pages/NotFound.tsx
+================================================================================
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+const NotFound = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+  }, [location.pathname]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted">
+      <div className="text-center">
+        <h1 className="mb-4 text-4xl font-bold">404</h1>
+        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
+        <a href="/" className="text-primary underline hover:text-primary/90">
+          Return to Home
+        </a>
+      </div>
+    </div>
+  );
+};
+
+export default NotFound;
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HOOKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: src/hooks/useDashboardData.ts
+================================================================================
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/services/api';
+
+export interface DashboardData {
+  productivity_score: number;
+  streak_days: number;
+  tasks_today: number;
+  tasks_week: number;
+  goals_met: string;
+  health_checkins: number;
+  projects: Array<{
+    id: string;
+    name: string;
+    status: string;
+    progress: number;
+    color: string;
+  }>;
+  goals: Array<{
+    id: string;
+    title: string;
+    completed: boolean;
+  }>;
+}
+
+export function useDashboardData() {
+  const dashboardQuery = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: api.dashboard,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+
+  const productivityQuery = useQuery({
+    queryKey: ['productivity', 'today'],
+    queryFn: api.productivity.todayScore,
+    staleTime: 30_000,
+  });
+
+  const streakQuery = useQuery({
+    queryKey: ['productivity', 'streak'],
+    queryFn: api.productivity.streak,
+    staleTime: 60_000,
+  });
+
+  const goalsQuery = useQuery({
+    queryKey: ['tasks', 'goals', 'today'],
+    queryFn: () => api.tasks.goals.list(),
+    staleTime: 30_000,
+  });
+
+  const projectsQuery = useQuery({
+    queryKey: ['projects', 'active'],
+    queryFn: () => api.projects.list('active'),
+    staleTime: 60_000,
+  });
+
+  const isLoading =
+    dashboardQuery.isLoading ||
+    productivityQuery.isLoading ||
+    streakQuery.isLoading;
+
+  const error =
+    dashboardQuery.error ||
+    productivityQuery.error ||
+    streakQuery.error;
+
+  const data: DashboardData | null = dashboardQuery.data
+    ? {
+        productivity_score: productivityQuery.data?.score ?? dashboardQuery.data?.productivity_score ?? 0,
+        streak_days: streakQuery.data?.current_streak ?? dashboardQuery.data?.streak_days ?? 0,
+        tasks_today: dashboardQuery.data?.tasks_today ?? 0,
+        tasks_week: dashboardQuery.data?.tasks_week ?? 0,
+        goals_met: dashboardQuery.data?.goals_met ?? '0/0',
+        health_checkins: dashboardQuery.data?.health_checkins ?? 0,
+        projects: projectsQuery.data ?? dashboardQuery.data?.projects ?? [],
+        goals: goalsQuery.data ?? dashboardQuery.data?.goals ?? [],
+      }
+    : null;
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: () => {
+      dashboardQuery.refetch();
+      productivityQuery.refetch();
+      streakQuery.refetch();
+      goalsQuery.refetch();
+      projectsQuery.refetch();
+    },
+  };
+}
+
+
+================================================================================
+FILE: src/hooks/useAgentApi.ts
+================================================================================
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/services/api';
+import type { CognitiveThought } from '@/components/agent/CognitiveStream';
+
+interface AgentStatus {
+  state: 'idle' | 'thinking' | 'executing' | 'intervening' | 'waiting';
+  current_task?: string;
+  emotion?: string;
+  trust_level?: number;
+}
+
+interface TimelineEntry {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: string;
+  data?: Record<string, unknown>;
+}
+
+const mapTimelineToThought = (entry: TimelineEntry): CognitiveThought => {
+  const typeMap: Record<string, CognitiveThought['type']> = {
+    observation: 'observation',
+    evaluation: 'evaluation',
+    decision: 'decision',
+    action: 'action',
+    waiting: 'waiting',
+    noticed: 'observation',
+    compared: 'evaluation',
+    decided: 'decision',
+    adjusted: 'action',
+    intervened: 'action',
+  };
+
+  return {
+    id: entry.id,
+    text: entry.message,
+    type: typeMap[entry.type] || 'observation',
+    timestamp: new Date(entry.timestamp),
+  };
+};
+
+export function useAgentStatus() {
+  return useQuery<AgentStatus>({
+    queryKey: ['agent', 'status'],
+    queryFn: api.agent.status,
+    refetchInterval: 5000,
+    staleTime: 3000,
+  });
+}
+
+export function useAgentTimeline(limit = 20) {
+  return useQuery<CognitiveThought[]>({
+    queryKey: ['activity', 'timeline', limit],
+    queryFn: async () => {
+      const entries: TimelineEntry[] = await api.activity.timeline(limit);
+      return entries.map(mapTimelineToThought);
+    },
+    refetchInterval: 8000,
+    staleTime: 5000,
+  });
+}
+
+export function useAgentApi() {
+  const statusQuery = useAgentStatus();
+  const timelineQuery = useAgentTimeline();
+
+  const mapStateToAgentState = (state?: string): 'idle' | 'thinking' | 'executing' | 'intervening' | 'waiting' => {
+    if (!state) return 'idle';
+    if (['idle', 'thinking', 'executing', 'intervening', 'waiting'].includes(state)) {
+      return state as 'idle' | 'thinking' | 'executing' | 'intervening' | 'waiting';
+    }
+    return 'idle';
+  };
+
+  return {
+    status: statusQuery.data,
+    agentState: mapStateToAgentState(statusQuery.data?.state),
+    thoughts: timelineQuery.data ?? [],
+    isLoading: statusQuery.isLoading || timelineQuery.isLoading,
+    error: statusQuery.error || timelineQuery.error,
+    refetch: () => {
+      statusQuery.refetch();
+      timelineQuery.refetch();
+    },
+  };
+}
+
+
+================================================================================
+FILE: src/hooks/useAgentState.ts
+================================================================================
+import { useState, useEffect, useCallback } from 'react';
+
+export type AgentEmotion = 'calm' | 'thinking' | 'concerned' | 'firm' | 'success';
+
+export interface AgentState {
+  emotion: AgentEmotion;
+  currentTask: string | null;
+  activationReason: string | null;
+  isActive: boolean;
+  trustLevel: number;
+}
+
+export interface CognitiveEntry {
+  id: string;
+  type: 'noticed' | 'compared' | 'decided' | 'waiting' | 'adjusted' | 'intervened';
+  message: string;
+  timestamp: Date;
+  emotion: AgentEmotion;
+}
+
+export interface AnticipationItem {
+  id: string;
+  message: string;
+  timeUntil: string;
+  type: 'action' | 'reminder' | 'warning';
+  confidence: number;
+}
+
+const MOCK_COGNITIVE_ENTRIES: CognitiveEntry[] = [
+  { id: '1', type: 'noticed', message: 'Sustained focus detected — 47 minutes uninterrupted', timestamp: new Date(Date.now() - 180000), emotion: 'calm' },
+  { id: '2', type: 'compared', message: 'Productivity 23% higher than weekly average', timestamp: new Date(Date.now() - 360000), emotion: 'success' },
+  { id: '3', type: 'decided', message: 'Deferring health check-in — you\'re in deep work', timestamp: new Date(Date.now() - 540000), emotion: 'calm' },
+  { id: '4', type: 'adjusted', message: 'Reduced notification frequency based on flow state', timestamp: new Date(Date.now() - 900000), emotion: 'calm' },
+  { id: '5', type: 'noticed', message: 'Task completion rate improved 3 days running', timestamp: new Date(Date.now() - 1800000), emotion: 'success' },
+  { id: '6', type: 'waiting', message: 'Pending your review on "API Integration" task', timestamp: new Date(Date.now() - 2700000), emotion: 'thinking' },
+  { id: '7', type: 'decided', message: 'Scheduled finance review for after lunch', timestamp: new Date(Date.now() - 3600000), emotion: 'thinking' },
+];
+
+const MOCK_ANTICIPATION: AnticipationItem[] = [
+  { id: '1', message: 'Health check-in approaching', timeUntil: '12 min', type: 'reminder', confidence: 0.85 },
+  { id: '2', message: 'Spending pattern review ready', timeUntil: '45 min', type: 'action', confidence: 0.7 },
+  { id: '3', message: 'Task deadline: API Integration', timeUntil: '2h', type: 'warning', confidence: 0.95 },
+];
+
+export function useAgentState() {
+  const [state, setState] = useState<AgentState>({
+    emotion: 'calm',
+    currentTask: null,
+    activationReason: null,
+    isActive: true,
+    trustLevel: 65,
+  });
+
+  const [cognitiveTimeline, setCognitiveTimeline] = useState<CognitiveEntry[]>(MOCK_COGNITIVE_ENTRIES);
+  const [anticipations, setAnticipations] = useState<AnticipationItem[]>(MOCK_ANTICIPATION);
+
+  useEffect(() => {
+    const emotions: AgentEmotion[] = ['calm', 'calm', 'calm', 'thinking', 'calm', 'success'];
+    let idx = 0;
+
+    const interval = setInterval(() => {
+      idx = (idx + 1) % emotions.length;
+      setState(prev => ({
+        ...prev,
+        emotion: emotions[idx],
+        currentTask: emotions[idx] === 'thinking' ? 'Analyzing productivity patterns...' : null,
+      }));
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const messages = [
+      { type: 'noticed' as const, message: 'You\'ve been consistent today', emotion: 'success' as const },
+      { type: 'adjusted' as const, message: 'Optimizing reminder timing', emotion: 'thinking' as const },
+      { type: 'decided' as const, message: 'Prioritizing project deadlines', emotion: 'calm' as const },
+    ];
+
+    const interval = setInterval(() => {
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+      const entry: CognitiveEntry = {
+        id: Date.now().toString(),
+        ...msg,
+        timestamp: new Date(),
+      };
+      setCognitiveTimeline(prev => [entry, ...prev].slice(0, 20));
+    }, 25000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const setEmotion = useCallback((emotion: AgentEmotion) => {
+    setState(prev => ({ ...prev, emotion }));
+  }, []);
+
+  return {
+    ...state,
+    cognitiveTimeline,
+    anticipations,
+    setEmotion,
+    setAnticipations,
+  };
+}
+
+
+================================================================================
+FILE: src/hooks/useBehaviorTracking.ts
+================================================================================
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+export interface BehaviorState {
+  isInFlow: boolean;
+  focusDuration: number;
+  consistency: number;
+  taskSkipCount: number;
+  inactivityDuration: number;
+  sessionMood: 'calm' | 'productive' | 'struggling' | 'neutral';
+}
+
+export function useBehaviorTracking() {
+  const [behavior, setBehavior] = useState<BehaviorState>({
+    isInFlow: false,
+    focusDuration: 0,
+    consistency: 72,
+    taskSkipCount: 0,
+    inactivityDuration: 0,
+    sessionMood: 'productive',
+  });
+
+  const lastActivity = useRef(Date.now());
+  const focusStart = useRef(Date.now());
+
+  useEffect(() => {
+    const onActivity = () => {
+      lastActivity.current = Date.now();
+      setBehavior(prev => ({ ...prev, inactivityDuration: 0 }));
+    };
+
+    window.addEventListener('mousemove', onActivity, { passive: true });
+    window.addEventListener('keydown', onActivity, { passive: true });
+    window.addEventListener('click', onActivity, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', onActivity);
+      window.removeEventListener('keydown', onActivity);
+      window.removeEventListener('click', onActivity);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const inactivity = Math.floor((Date.now() - lastActivity.current) / 1000);
+      const focusMin = Math.floor((Date.now() - focusStart.current) / 60000);
+
+      setBehavior(prev => ({
+        ...prev,
+        inactivityDuration: inactivity,
+        focusDuration: focusMin,
+        isInFlow: focusMin > 15 && inactivity < 120 && prev.taskSkipCount < 2,
+        sessionMood: focusMin > 25 ? 'productive' : inactivity > 300 ? 'struggling' : 'neutral',
+      }));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const recordTaskSkip = useCallback(() => {
+    setBehavior(prev => ({ ...prev, taskSkipCount: prev.taskSkipCount + 1 }));
+  }, []);
+
+  const recordTaskComplete = useCallback(() => {
+    setBehavior(prev => ({
+      ...prev,
+      consistency: Math.min(100, prev.consistency + 3),
+      taskSkipCount: Math.max(0, prev.taskSkipCount - 1),
+    }));
+  }, []);
+
+  return { behavior, recordTaskSkip, recordTaskComplete };
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# LAYOUT COMPONENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: src/components/layout/AppSidebar.tsx
+================================================================================
+import {
+  LayoutDashboard, FolderKanban, ListTodo, TrendingUp, Heart, Wallet,
+  BookOpen, Shield, Users, Bot, Settings, ChevronLeft, ChevronRight, Zap,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { AgentOrb } from '@/components/agent/AgentOrb';
+import type { AgentEmotion } from '@/hooks/useAgentState';
+
+export type PageKey = 'dashboard' | 'projects' | 'tasks' | 'productivity' | 'health' | 'finances' | 'knowledge' | 'vault' | 'freelance' | 'ai_chat' | 'settings';
+
+interface SidebarProps {
+  currentPage: PageKey;
+  onNavigate: (page: PageKey) => void;
+  collapsed: boolean;
+  onToggle: () => void;
+  agentEmotion: AgentEmotion;
+  onAgentClick: () => void;
+}
+
+const NAV_ITEMS: { key: PageKey; icon: any; label: string; section?: string }[] = [
+  { key: 'dashboard', icon: LayoutDashboard, label: 'Command Center' },
+  { key: 'projects', icon: FolderKanban, label: 'Projects', section: 'Work' },
+  { key: 'tasks', icon: ListTodo, label: 'Tasks' },
+  { key: 'productivity', icon: TrendingUp, label: 'Productivity' },
+  { key: 'health', icon: Heart, label: 'Wellness', section: 'Life' },
+  { key: 'finances', icon: Wallet, label: 'Finances' },
+  { key: 'knowledge', icon: BookOpen, label: 'Knowledge', section: 'Growth' },
+  { key: 'vault', icon: Shield, label: 'Vault' },
+  { key: 'freelance', icon: Users, label: 'Freelance' },
+  { key: 'ai_chat', icon: Bot, label: 'AI Chat', section: 'Intelligence' },
+  { key: 'settings', icon: Settings, label: 'Settings' },
+];
+
+export function AppSidebar({ currentPage, onNavigate, collapsed, onToggle, agentEmotion, onAgentClick }: SidebarProps) {
+  let lastSection = '';
+
+  return (
+    <motion.aside
+      className="flex flex-col border-r border-border flex-shrink-0 h-screen overflow-hidden"
+      style={{ background: 'hsl(var(--sidebar-background))' }}
+      animate={{ width: collapsed ? 64 : 220 }}
+      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      <div className="h-16 flex items-center justify-between px-3 border-b border-border">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <AgentOrb emotion={agentEmotion} size="sm" onClick={onAgentClick} />
+          {!collapsed && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm font-display font-bold tracking-wide text-foreground truncate"
+            >
+              NEBUNEX
+            </motion.span>
+          )}
+        </div>
+        <button
+          onClick={onToggle}
+          className="p-1 rounded-md hover:bg-secondary text-muted-foreground transition-colors"
+        >
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+      </div>
+
+      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto overflow-x-hidden">
+        {NAV_ITEMS.map(({ key, icon: Icon, label, section }) => {
+          const showSection = section && section !== lastSection;
+          if (section) lastSection = section;
+
+          return (
+            <div key={key}>
+              {showSection && !collapsed && (
+                <p className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground px-3 pt-4 pb-1.5">
+                  {section}
+                </p>
+              )}
+              {showSection && collapsed && <div className="h-3" />}
+              <button
+                onClick={() => onNavigate(key)}
+                className={`w-full flex items-center gap-3 rounded-lg text-sm transition-all duration-200 ${
+                  collapsed ? 'px-0 py-2.5 justify-center' : 'px-3 py-2'
+                } ${
+                  currentPage === key
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-sidebar-foreground hover:text-foreground hover:bg-secondary/50'
+                }`}
+              >
+                <Icon size={17} className="flex-shrink-0" />
+                {!collapsed && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="truncate"
+                  >
+                    {label}
+                  </motion.span>
+                )}
+              </button>
+            </div>
+          );
+        })}
+      </nav>
+
+      <div className="px-3 py-3 border-t border-border">
+        {!collapsed && (
+          <div className="text-[10px] font-mono text-muted-foreground space-y-0.5">
+            <p className="flex items-center gap-1.5">
+              <Zap size={9} className="text-primary" />
+              NEBUNEX v4
+            </p>
+            <p>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+        )}
+      </div>
+    </motion.aside>
+  );
+}
+
+
+================================================================================
+FILE: src/components/layout/AppHeader.tsx
+================================================================================
+import { Search, Bell } from 'lucide-react';
+import { AgentOrb } from '@/components/agent/AgentOrb';
+import type { AgentEmotion } from '@/hooks/useAgentState';
+import type { PageKey } from './AppSidebar';
+
+interface HeaderProps {
+  currentPage: PageKey;
+  agentEmotion: AgentEmotion;
+  onSearchOpen: () => void;
+  onAgentClick: () => void;
+}
+
+const pageTitles: Record<PageKey, string> = {
+  dashboard: 'Command Center',
+  projects: 'Projects',
+  tasks: 'Tasks',
+  productivity: 'Productivity',
+  health: 'Wellness',
+  finances: 'Finances',
+  knowledge: 'Knowledge',
+  vault: 'Vault',
+  freelance: 'Freelance',
+  ai_chat: 'AI Intelligence',
+  settings: 'Settings',
+};
+
+export function AppHeader({ currentPage, agentEmotion, onSearchOpen, onAgentClick }: HeaderProps) {
+  return (
+    <header className="h-14 flex items-center justify-between px-6 border-b border-border bg-background flex-shrink-0">
+      <h2 className="text-sm font-display font-semibold text-secondary-foreground">
+        {pageTitles[currentPage]}
+      </h2>
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onSearchOpen}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-secondary/30 text-muted-foreground text-sm hover:border-muted-foreground/30 transition-colors"
+        >
+          <Search size={13} />
+          <span className="text-xs">Search...</span>
+          <kbd className="text-[10px] px-1.5 py-0.5 bg-muted rounded text-muted-foreground font-mono">⌘K</kbd>
+        </button>
+
+        <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors relative">
+          <Bell size={17} />
+        </button>
+
+        <div className="ml-1">
+          <AgentOrb emotion={agentEmotion} size="sm" onClick={onAgentClick} />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AGENT COMPONENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+================================================================================
+FILE: src/components/agent/AgentOrb.tsx
+================================================================================
+import { motion } from 'framer-motion';
+import type { AgentEmotion } from '@/hooks/useAgentState';
+
+interface AgentOrbProps {
+  emotion: AgentEmotion;
+  size?: 'sm' | 'md' | 'lg';
+  onClick?: () => void;
+  showPulse?: boolean;
+}
+
+const emotionConfig: Record<AgentEmotion, {
+  gradient: string[];
+  shadow: string;
+  breatheDuration: number;
+  scale: [number, number];
+}> = {
+  calm: {
+    gradient: ['hsl(200, 70%, 50%)', 'hsl(210, 65%, 40%)', 'hsl(190, 60%, 55%)'],
+    shadow: 'hsla(200, 70%, 50%, 0.25)',
+    breatheDuration: 4,
+    scale: [1, 1.06],
+  },
+  thinking: {
+    gradient: ['hsl(38, 92%, 55%)', 'hsl(32, 85%, 48%)', 'hsl(45, 88%, 58%)'],
+    shadow: 'hsla(38, 92%, 55%, 0.3)',
+    breatheDuration: 1.8,
+    scale: [0.97, 1.05],
+  },
+  concerned: {
+    gradient: ['hsl(12, 80%, 58%)', 'hsl(8, 75%, 50%)', 'hsl(18, 82%, 55%)'],
+    shadow: 'hsla(12, 80%, 58%, 0.25)',
+    breatheDuration: 2.5,
+    scale: [0.99, 1.04],
+  },
+  firm: {
+    gradient: ['hsl(220, 15%, 72%)', 'hsl(220, 20%, 60%)', 'hsl(215, 12%, 78%)'],
+    shadow: 'hsla(220, 15%, 72%, 0.2)',
+    breatheDuration: 1,
+    scale: [1, 1.02],
+  },
+  success: {
+    gradient: ['hsl(160, 55%, 42%)', 'hsl(165, 50%, 36%)', 'hsl(155, 60%, 48%)'],
+    shadow: 'hsla(160, 55%, 42%, 0.25)',
+    breatheDuration: 3,
+    scale: [1, 1.05],
+  },
+};
+
+const sizeMap = {
+  sm: { container: 32, inner: 20 },
+  md: { container: 44, inner: 28 },
+  lg: { container: 64, inner: 40 },
+};
+
+export function AgentOrb({ emotion, size = 'md', onClick, showPulse = true }: AgentOrbProps) {
+  const config = emotionConfig[emotion];
+  const dims = sizeMap[size];
+
+  return (
+    <motion.button
+      onClick={onClick}
+      className="relative flex items-center justify-center cursor-pointer group"
+      style={{ width: dims.container, height: dims.container }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      title={`Agent is ${emotion}`}
+    >
+      {showPulse && (
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: `radial-gradient(circle, ${config.shadow}, transparent 70%)`,
+          }}
+          animate={{
+            scale: config.scale,
+            opacity: [0.4, 0.8, 0.4],
+          }}
+          transition={{
+            duration: config.breatheDuration,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      )}
+
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: dims.inner,
+          height: dims.inner,
+          background: `radial-gradient(circle at 35% 35%, ${config.gradient[2]}, ${config.gradient[0]}, ${config.gradient[1]})`,
+          boxShadow: `0 0 ${dims.inner * 0.6}px ${config.shadow}`,
+        }}
+        animate={{
+          scale: config.scale,
+        }}
+        transition={{
+          duration: config.breatheDuration,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: dims.inner * 0.4,
+          height: dims.inner * 0.4,
+          background: `radial-gradient(circle, hsla(0, 0%, 100%, 0.35), transparent)`,
+          top: dims.container * 0.28,
+          left: dims.container * 0.32,
+        }}
+        animate={{
+          opacity: [0.3, 0.6, 0.3],
+        }}
+        transition={{
+          duration: config.breatheDuration * 0.8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+    </motion.button>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/AgentPresenceCore.tsx
+================================================================================
+import { motion, useAnimation } from 'framer-motion';
+import { useEffect, useMemo } from 'react';
+
+export type AgentState = 'idle' | 'thinking' | 'executing' | 'intervening' | 'waiting' | 'listening';
+
+interface AgentPresenceCoreProps {
+  state: AgentState;
+  size?: number;
+}
+
+const stateConfig: Record<AgentState, {
+  colors: string[];
+  breatheDuration: number;
+  layerCount: number;
+  rotationSpeed: number;
+  pulseIntensity: number;
+}> = {
+  idle: {
+    colors: ['hsla(200, 70%, 50%, 0.15)', 'hsla(200, 70%, 50%, 0.08)', 'hsla(200, 70%, 50%, 0.03)'],
+    breatheDuration: 5,
+    layerCount: 3,
+    rotationSpeed: 60,
+    pulseIntensity: 0.08,
+  },
+  thinking: {
+    colors: ['hsla(38, 92%, 55%, 0.25)', 'hsla(38, 92%, 55%, 0.15)', 'hsla(38, 92%, 55%, 0.08)', 'hsla(32, 85%, 48%, 0.05)'],
+    breatheDuration: 2,
+    layerCount: 4,
+    rotationSpeed: 20,
+    pulseIntensity: 0.15,
+  },
+  executing: {
+    colors: ['hsla(200, 70%, 55%, 0.3)', 'hsla(200, 70%, 50%, 0.2)', 'hsla(200, 70%, 45%, 0.1)'],
+    breatheDuration: 1.2,
+    layerCount: 3,
+    rotationSpeed: 8,
+    pulseIntensity: 0.12,
+  },
+  intervening: {
+    colors: ['hsla(12, 80%, 58%, 0.35)', 'hsla(12, 80%, 58%, 0.2)', 'hsla(12, 80%, 58%, 0.1)'],
+    breatheDuration: 1.5,
+    layerCount: 3,
+    rotationSpeed: 15,
+    pulseIntensity: 0.18,
+  },
+  waiting: {
+    colors: ['hsla(160, 55%, 45%, 0.2)', 'hsla(160, 55%, 45%, 0.1)', 'hsla(160, 55%, 45%, 0.05)'],
+    breatheDuration: 3,
+    layerCount: 3,
+    rotationSpeed: 40,
+    pulseIntensity: 0.1,
+  },
+  listening: {
+    colors: ['hsla(280, 60%, 55%, 0.3)', 'hsla(280, 60%, 55%, 0.18)', 'hsla(280, 60%, 55%, 0.08)'],
+    breatheDuration: 0.8,
+    layerCount: 4,
+    rotationSpeed: 12,
+    pulseIntensity: 0.2,
+  },
+};
+
+export function AgentPresenceCore({ state, size = 180 }: AgentPresenceCoreProps) {
+  const config = stateConfig[state];
+  const controls = useAnimation();
+
+  useEffect(() => {
+    controls.start({
+      scale: [1, 1 + config.pulseIntensity, 1],
+      transition: {
+        duration: config.breatheDuration,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
+    });
+  }, [state, config, controls]);
+
+  const layers = useMemo(() => {
+    return Array.from({ length: config.layerCount }, (_, i) => {
+      const layerSize = size * (0.4 + (i * 0.2));
+      const delay = i * 0.15;
+      const direction = i % 2 === 0 ? 1 : -1;
+
+      return (
+        <motion.div
+          key={`${state}-layer-${i}`}
+          className="absolute rounded-full"
+          style={{
+            width: layerSize,
+            height: layerSize,
+            background: `radial-gradient(circle, ${config.colors[i] || config.colors[0]}, transparent 70%)`,
+          }}
+          animate={{
+            scale: [1, 1 + config.pulseIntensity * (1 - i * 0.2), 1],
+            rotate: [0, 360 * direction],
+            opacity: [0.6, 1, 0.6],
+          }}
+          transition={{
+            scale: {
+              duration: config.breatheDuration + delay,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            },
+            rotate: {
+              duration: config.rotationSpeed * (1 + i * 0.5),
+              repeat: Infinity,
+              ease: 'linear',
+            },
+            opacity: {
+              duration: config.breatheDuration * 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay,
+            },
+          }}
+        />
+      );
+    });
+  }, [state, config, size]);
+
+  return (
+    <div
+      className="relative flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      <motion.div
+        className="absolute rounded-full blur-3xl"
+        style={{
+          width: size * 1.2,
+          height: size * 1.2,
+          background: config.colors[0],
+        }}
+        animate={{
+          scale: [0.9, 1.1, 0.9],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: config.breatheDuration * 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+
+      {layers}
+
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: size * 0.25,
+          height: size * 0.25,
+          background: `radial-gradient(circle at 35% 35%, 
+            hsla(0, 0%, 100%, 0.25), 
+            ${config.colors[0].replace(/[\d.]+\)$/, '0.8)')}, 
+            ${config.colors[0].replace(/[\d.]+\)$/, '0.4)')}
+          )`,
+          boxShadow: `0 0 ${size * 0.2}px ${config.colors[0]}`,
+        }}
+        animate={controls}
+      />
+
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: size * 0.12,
+          height: size * 0.12,
+          background: 'radial-gradient(circle, hsla(0, 0%, 100%, 0.5), transparent)',
+          top: size * 0.42,
+          left: size * 0.44,
+        }}
+        animate={{
+          opacity: [0.3, 0.7, 0.3],
+        }}
+        transition={{
+          duration: config.breatheDuration * 0.7,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/TimeFlowRing.tsx
+================================================================================
+import { motion } from 'framer-motion';
+import { useMemo } from 'react';
+
+interface TimeEvent {
+  id: string;
+  label: string;
+  minutesFromNow: number;
+  type: 'past' | 'now' | 'approaching' | 'future';
+  importance: 'low' | 'medium' | 'high';
+}
+
+interface TimeFlowRingProps {
+  events: TimeEvent[];
+  size?: number;
+}
+
+export function TimeFlowRing({ events, size = 280 }: TimeFlowRingProps) {
+  const radius = size / 2 - 40;
+  const centerX = size / 2;
+  const centerY = size / 2;
+
+  const arcPath = useMemo(() => {
+    const startAngle = -Math.PI * 0.75;
+    const endAngle = Math.PI * 0.75;
+    
+    const startX = centerX + radius * Math.cos(startAngle);
+    const startY = centerY + radius * Math.sin(startAngle);
+    const endX = centerX + radius * Math.cos(endAngle);
+    const endY = centerY + radius * Math.sin(endAngle);
+
+    return `M ${startX} ${startY} A ${radius} ${radius} 0 1 1 ${endX} ${endY}`;
+  }, [radius, centerX, centerY]);
+
+  const positionedEvents = useMemo(() => {
+    return events.map((event) => {
+      const normalizedPos = (event.minutesFromNow + 60) / 180;
+      const clampedPos = Math.max(0, Math.min(1, normalizedPos));
+      
+      const startAngle = -Math.PI * 0.75;
+      const angleRange = Math.PI * 1.5;
+      const angle = startAngle + clampedPos * angleRange;
+      
+      const eventRadius = radius + (event.type === 'now' ? 0 : event.type === 'approaching' ? 5 : 10);
+      const x = centerX + eventRadius * Math.cos(angle);
+      const y = centerY + eventRadius * Math.sin(angle);
+
+      return { ...event, x, y, angle };
+    });
+  }, [events, radius, centerX, centerY]);
+
+  const getEventColor = (type: TimeEvent['type'], importance: TimeEvent['importance']) => {
+    if (type === 'now') return 'hsl(var(--primary))';
+    if (type === 'approaching') {
+      if (importance === 'high') return 'hsl(var(--agent-concerned))';
+      return 'hsl(var(--agent-thinking))';
+    }
+    if (type === 'past') return 'hsl(var(--muted-foreground))';
+    return 'hsl(var(--secondary-foreground))';
+  };
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="absolute inset-0">
+        <motion.path
+          d={arcPath}
+          fill="none"
+          stroke="hsl(var(--border))"
+          strokeWidth="2"
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.5 }}
+          transition={{ duration: 2, ease: 'easeOut' }}
+        />
+
+        <motion.path
+          d={arcPath}
+          fill="none"
+          stroke="url(#timeGradient)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="8 12"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 3, ease: 'easeOut' }}
+        />
+
+        <defs>
+          <linearGradient id="timeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity="0.3" />
+            <stop offset="40%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
+            <stop offset="60%" stopColor="hsl(var(--agent-thinking))" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="hsl(var(--muted-foreground))" stopOpacity="0.2" />
+          </linearGradient>
+        </defs>
+
+        <motion.circle
+          cx={centerX + radius * Math.cos(-Math.PI * 0.25)}
+          cy={centerY + radius * Math.sin(-Math.PI * 0.25)}
+          r="6"
+          fill="hsl(var(--primary))"
+          animate={{
+            r: [5, 8, 5],
+            opacity: [0.8, 1, 0.8],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      </svg>
+
+      {positionedEvents.map((event, i) => (
+        <motion.div
+          key={event.id}
+          className="absolute flex flex-col items-center"
+          style={{
+            left: event.x,
+            top: event.y,
+            transform: 'translate(-50%, -50%)',
+          }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.1 + 0.5, duration: 0.5 }}
+        >
+          <motion.div
+            className="rounded-full"
+            style={{
+              width: event.type === 'now' ? 12 : event.importance === 'high' ? 8 : 6,
+              height: event.type === 'now' ? 12 : event.importance === 'high' ? 8 : 6,
+              background: getEventColor(event.type, event.importance),
+              boxShadow: event.type === 'approaching' && event.importance === 'high'
+                ? `0 0 12px ${getEventColor(event.type, event.importance)}`
+                : 'none',
+            }}
+            animate={
+              event.type === 'approaching'
+                ? { scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }
+                : {}
+            }
+            transition={{
+              duration: event.importance === 'high' ? 1.5 : 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+
+          {(event.type === 'now' || event.type === 'approaching' || event.importance === 'high') && (
+            <motion.span
+              className="absolute whitespace-nowrap text-[9px] font-mono mt-4"
+              style={{
+                color: getEventColor(event.type, event.importance),
+                top: '100%',
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: event.type === 'past' ? 0.4 : 0.9 }}
+              transition={{ delay: i * 0.1 + 0.8 }}
+            >
+              {event.label}
+            </motion.span>
+          )}
+        </motion.div>
+      ))}
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <motion.p
+            className="text-2xl font-display font-bold text-foreground tabular-nums"
+            animate={{ opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+          </motion.p>
+          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mt-1">
+            now
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/CognitiveStream.tsx
+================================================================================
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+export interface CognitiveThought {
+  id: string;
+  text: string;
+  type: 'observation' | 'evaluation' | 'decision' | 'action' | 'waiting';
+  timestamp: Date;
+}
+
+interface CognitiveStreamProps {
+  thoughts: CognitiveThought[];
+  maxVisible?: number;
+}
+
+const typeStyles: Record<CognitiveThought['type'], { color: string; prefix: string }> = {
+  observation: { color: 'hsl(var(--muted-foreground))', prefix: '○' },
+  evaluation: { color: 'hsl(var(--agent-thinking))', prefix: '◐' },
+  decision: { color: 'hsl(var(--primary))', prefix: '◆' },
+  action: { color: 'hsl(var(--accent))', prefix: '▸' },
+  waiting: { color: 'hsl(var(--agent-concerned))', prefix: '◎' },
+};
+
+export function CognitiveStream({ thoughts, maxVisible = 5 }: CognitiveStreamProps) {
+  const [visibleThoughts, setVisibleThoughts] = useState<CognitiveThought[]>([]);
+
+  useEffect(() => {
+    setVisibleThoughts(thoughts.slice(0, maxVisible));
+  }, [thoughts, maxVisible]);
+
+  return (
+    <div className="relative h-full flex flex-col justify-end overflow-hidden">
+      <div 
+        className="absolute top-0 left-0 right-0 h-12 pointer-events-none z-10"
+        style={{
+          background: 'linear-gradient(to bottom, hsl(var(--surface-sunken)), transparent)',
+        }}
+      />
+
+      <div className="space-y-1 px-1">
+        <AnimatePresence mode="popLayout">
+          {visibleThoughts.map((thought, i) => {
+            const style = typeStyles[thought.type];
+            const isLatest = i === 0;
+            const age = (Date.now() - thought.timestamp.getTime()) / 1000;
+            const opacity = isLatest ? 1 : Math.max(0.3, 1 - (age / 120));
+
+            return (
+              <motion.div
+                key={thought.id}
+                layout
+                initial={{ opacity: 0, x: -20, filter: 'blur(4px)' }}
+                animate={{
+                  opacity: opacity,
+                  x: 0,
+                  filter: 'blur(0px)',
+                }}
+                exit={{ opacity: 0, x: 20, filter: 'blur(4px)' }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.1, 0.25, 1],
+                  layout: { duration: 0.4 },
+                }}
+                className="flex items-start gap-2 py-2"
+              >
+                <motion.span
+                  className="text-sm font-mono mt-0.5 flex-shrink-0"
+                  style={{ color: style.color }}
+                  animate={
+                    isLatest && thought.type === 'evaluation'
+                      ? { opacity: [1, 0.5, 1] }
+                      : {}
+                  }
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                  }}
+                >
+                  {style.prefix}
+                </motion.span>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{
+                    color: isLatest ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
+                  }}
+                >
+                  {thought.text}
+                </p>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {visibleThoughts.length === 0 && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            className="text-sm text-muted-foreground text-center py-8"
+          >
+            Observing...
+          </motion.p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/InterventionLayer.tsx
+================================================================================
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mic, MicOff } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+
+interface InterventionLayerProps {
+  active: boolean;
+  message: string;
+  onRespond: (response: string) => void;
+  onDismiss: () => void;
+  isListening?: boolean;
+  isSpeaking?: boolean;
+}
+
+export function InterventionLayer({
+  active,
+  message,
+  onRespond,
+  onDismiss,
+  isListening = false,
+  isSpeaking = false,
+}: InterventionLayerProps) {
+  const [input, setInput] = useState('');
+  const [listeningAnimation, setListeningAnimation] = useState(false);
+
+  useEffect(() => {
+    if (isListening) {
+      setListeningAnimation(true);
+    } else {
+      const timeout = setTimeout(() => setListeningAnimation(false), 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isListening]);
+
+  const handleSubmit = useCallback(() => {
+    if (input.trim()) {
+      onRespond(input.trim());
+      setInput('');
+    }
+  }, [input, onRespond]);
+
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="absolute inset-0 z-20 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.7 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-background"
+            onClick={onDismiss}
+          />
+
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            className="relative z-10 w-full max-w-sm mx-6"
+          >
+            <motion.div
+              className="mb-6 text-center"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {isSpeaking && (
+                <motion.div
+                  className="flex justify-center gap-1 mb-4"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 rounded-full bg-primary"
+                      animate={{ height: [8, 20 + i * 4, 8] }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Infinity,
+                        delay: i * 0.1,
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+              <p className="text-base text-foreground leading-relaxed">{message}</p>
+            </motion.div>
+
+            {listeningAnimation && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="flex justify-center mb-6"
+              >
+                <motion.div
+                  className="relative flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  <motion.div
+                    className="absolute w-16 h-16 rounded-full bg-primary/20"
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                  <motion.div
+                    className="absolute w-12 h-12 rounded-full bg-primary/30"
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.2, 0.6] }}
+                    transition={{ duration: 1.2, repeat: Infinity, delay: 0.1 }}
+                  />
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                    <Mic size={18} className="text-primary-foreground" />
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {!isListening && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="space-y-3"
+              >
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                    placeholder="Respond..."
+                    className="w-full px-4 py-3 text-sm bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {}}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+                  >
+                    <MicOff size={16} />
+                  </button>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={onDismiss}
+                    className="flex-1 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground bg-secondary/50 rounded-xl transition-colors"
+                  >
+                    Later
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!input.trim()}
+                    className="flex-1 px-4 py-2.5 text-sm text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                  >
+                    Respond
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/CognitiveTimeline.tsx
+================================================================================
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Eye, GitCompare, Lightbulb, Clock, Settings, Zap } from 'lucide-react';
+import type { CognitiveEntry } from '@/hooks/useAgentState';
+import { AgentOrb } from './AgentOrb';
+
+interface CognitiveTimelineProps {
+  entries: CognitiveEntry[];
+  open: boolean;
+  onClose: () => void;
+  agentEmotion: 'calm' | 'thinking' | 'concerned' | 'firm' | 'success';
+}
+
+const typeConfig: Record<CognitiveEntry['type'], { icon: any; label: string; color: string }> = {
+  noticed: { icon: Eye, label: 'Noticed', color: 'hsl(var(--agent-calm))' },
+  compared: { icon: GitCompare, label: 'Compared', color: 'hsl(var(--agent-thinking))' },
+  decided: { icon: Lightbulb, label: 'Decided', color: 'hsl(var(--agent-success))' },
+  waiting: { icon: Clock, label: 'Waiting', color: 'hsl(var(--muted-foreground))' },
+  adjusted: { icon: Settings, label: 'Adjusted', color: 'hsl(var(--primary))' },
+  intervened: { icon: Zap, label: 'Intervened', color: 'hsl(var(--agent-concerned))' },
+};
+
+function formatTime(date: Date) {
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return date.toLocaleDateString();
+}
+
+export function CognitiveTimeline({ entries, open, onClose, agentEmotion }: CognitiveTimelineProps) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ x: '100%', opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          className="fixed top-0 right-0 h-screen w-[380px] z-50 flex flex-col border-l border-border"
+          style={{ background: 'hsl(var(--surface-sunken))' }}
+        >
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <AgentOrb emotion={agentEmotion} size="sm" />
+              <div>
+                <h3 className="text-sm font-display font-semibold text-foreground">Agent Mind</h3>
+                <p className="text-xs text-muted-foreground">Decision breadcrumbs</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-auto px-5 py-4">
+            <div className="space-y-1">
+              <AnimatePresence initial={false}>
+                {entries.map((entry, i) => {
+                  const config = typeConfig[entry.type];
+                  const Icon = config.icon;
+
+                  return (
+                    <motion.div
+                      key={entry.id}
+                      initial={{ opacity: 0, y: -10, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3, delay: i === 0 ? 0 : 0 }}
+                      className="relative flex gap-3 py-3"
+                    >
+                      {i < entries.length - 1 && (
+                        <div className="absolute left-[11px] top-10 bottom-0 w-px bg-border" />
+                      )}
+
+                      <div
+                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5"
+                        style={{
+                          background: `${config.color}15`,
+                          border: `1px solid ${config.color}30`,
+                        }}
+                      >
+                        <Icon size={12} style={{ color: config.color }} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span
+                            className="text-[10px] font-mono font-medium uppercase tracking-wider"
+                            style={{ color: config.color }}
+                          >
+                            {config.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {formatTime(entry.timestamp)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-secondary-foreground leading-relaxed">
+                          {entry.message}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+
+              {entries.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-sm text-muted-foreground">
+                    Agent is observing. Decisions will appear here.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="px-5 py-3 border-t border-border">
+            <p className="text-[10px] text-muted-foreground text-center">
+              {entries.length} decisions tracked this session
+            </p>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/AnticipationLayer.tsx
+================================================================================
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, AlertTriangle, Zap } from 'lucide-react';
+import type { AnticipationItem } from '@/hooks/useAgentState';
+
+interface AnticipationLayerProps {
+  items: AnticipationItem[];
+}
+
+const typeConfig: Record<AnticipationItem['type'], { icon: any; color: string }> = {
+  action: { icon: Zap, color: 'hsl(var(--primary))' },
+  reminder: { icon: Clock, color: 'hsl(var(--agent-thinking))' },
+  warning: { icon: AlertTriangle, color: 'hsl(var(--agent-concerned))' },
+};
+
+export function AnticipationLayer({ items }: AnticipationLayerProps) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+        <span className="w-1 h-1 rounded-full bg-primary pulse-subtle" />
+        Approaching
+      </p>
+      <div className="grid grid-cols-3 gap-2">
+        <AnimatePresence>
+          {items.map((item, i) => {
+            const config = typeConfig[item.type];
+            const Icon = config.icon;
+
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 6, filter: 'blur(4px)' }}
+                animate={{
+                  opacity: item.confidence,
+                  y: 0,
+                  filter: 'blur(0px)',
+                }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{
+                  duration: 1.2,
+                  delay: i * 0.15,
+                  ease: [0.25, 0.1, 0.25, 1],
+                }}
+                className="rounded-xl border border-border p-3 transition-colors hover:bg-secondary/50"
+                style={{
+                  background: `linear-gradient(135deg, hsl(var(--card)), hsl(var(--card)) 80%, ${config.color}08)`,
+                }}
+              >
+                <div className="flex items-start gap-2">
+                  <div
+                    className="p-1.5 rounded-lg mt-0.5"
+                    style={{ background: `${config.color}12` }}
+                  >
+                    <Icon size={12} style={{ color: config.color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-secondary-foreground leading-snug">{item.message}</p>
+                    <p className="text-[10px] font-mono mt-1.5" style={{ color: config.color }}>
+                      in {item.timeUntil}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+FILE: src/components/agent/AgentLivingPopup.tsx
+================================================================================
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { AgentPresenceCore, type AgentState } from './AgentPresenceCore';
+import { TimeFlowRing } from './TimeFlowRing';
+import { CognitiveStream, type CognitiveThought } from './CognitiveStream';
+import { InterventionLayer } from './InterventionLayer';
+import { useAgentApi } from '@/hooks/useAgentApi';
+
+interface AgentLivingPopupProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const AGENT_STATES: AgentState[] = ['idle', 'thinking', 'executing', 'idle', 'thinking', 'idle'];
+const COGNITIVE_THOUGHTS: Omit<CognitiveThought, 'id' | 'timestamp'>[] = [
+  { text: 'Session initialized. Loading context from last activity...', type: 'observation' },
+  { text: 'Task deadline approaching in 2 hours', type: 'observation' },
+  { text: 'Evaluating priority against current focus state', type: 'evaluation' },
+  { text: 'User appears to be in productive flow', type: 'observation' },
+  { text: 'Deferring interruption — focus preservation takes priority', type: 'decision' },
+  { text: 'Scheduling reminder for natural break point', type: 'action' },
+  { text: 'Monitoring spending pattern from last 48 hours', type: 'observation' },
+  { text: 'Threshold exceeded. Preparing intervention.', type: 'evaluation' },
+  { text: 'Financial review queued for next idle period', type: 'decision' },
+  { text: 'Health check-in window approaching', type: 'observation' },
+  { text: 'Waiting for user acknowledgment', type: 'waiting' },
+];
+
+export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
+  const { agentState: apiState, thoughts: apiThoughts, isLoading } = useAgentApi();
+  
+  const [agentState, setAgentState] = useState<AgentState>('idle');
+  const [thoughts, setThoughts] = useState<CognitiveThought[]>([]);
+  const [interventionActive, setInterventionActive] = useState(false);
+  const [interventionMessage, setInterventionMessage] = useState('');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    if (apiState && apiState !== agentState) {
+      setAgentState(apiState);
+    }
+  }, [apiState]);
+
+  useEffect(() => {
+    if (apiThoughts.length > 0) {
+      setThoughts(apiThoughts);
+    }
+  }, [apiThoughts]);
+
+  const timeEvents = useMemo(() => [
+    { id: '1', label: 'Session start', minutesFromNow: -45, type: 'past' as const, importance: 'low' as const },
+    { id: '2', label: 'Task completed', minutesFromNow: -15, type: 'past' as const, importance: 'medium' as const },
+    { id: '3', label: 'Now', minutesFromNow: 0, type: 'now' as const, importance: 'high' as const },
+    { id: '4', label: 'Health check', minutesFromNow: 12, type: 'approaching' as const, importance: 'medium' as const },
+    { id: '5', label: 'Task deadline', minutesFromNow: 45, type: 'approaching' as const, importance: 'high' as const },
+    { id: '6', label: 'Finance review', minutesFromNow: 90, type: 'future' as const, importance: 'low' as const },
+  ], []);
+
+  useEffect(() => {
+    if (!open || apiThoughts.length > 0) return;
+
+    const FALLBACK_THOUGHTS: Omit<CognitiveThought, 'id' | 'timestamp'>[] = [
+      { text: 'Session initialized. Loading context from last activity...', type: 'observation' },
+      { text: 'Task deadline approaching in 2 hours', type: 'observation' },
+      { text: 'Evaluating priority against current focus state', type: 'evaluation' },
+      { text: 'User appears to be in productive flow', type: 'observation' },
+      { text: 'Deferring interruption — focus preservation takes priority', type: 'decision' },
+    ];
+
+    const initialThoughts = FALLBACK_THOUGHTS.slice(0, 3).map((t, i) => ({
+      ...t,
+      id: `initial-${i}`,
+      timestamp: new Date(Date.now() - (3 - i) * 20000),
+    }));
+    setThoughts(initialThoughts);
+
+    let idx = 3;
+    const interval = setInterval(() => {
+      const thought = FALLBACK_THOUGHTS[idx % FALLBACK_THOUGHTS.length];
+      setThoughts((prev) => [
+        { ...thought, id: `thought-${Date.now()}`, timestamp: new Date() },
+        ...prev,
+      ].slice(0, 12));
+      idx++;
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [open, apiThoughts.length]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const interval = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const timeout = setTimeout(() => {
+      setInterventionActive(true);
+      setAgentState('intervening');
+      setInterventionMessage("I've noticed you've been working for over an hour. Would you like a brief wellness check, or should I schedule it for later?");
+    }, 25000);
+
+    return () => clearTimeout(timeout);
+  }, [open]);
+
+  const handleInterventionRespond = useCallback((response: string) => {
+    console.log('User responded:', response);
+    setInterventionActive(false);
+    setAgentState('executing');
+    
+    setThoughts((prev): CognitiveThought[] => [
+      { id: `response-${Date.now()}`, text: `User responded: "${response}"`, type: 'observation' as const, timestamp: new Date() },
+      { id: `action-${Date.now()}`, text: 'Processing response and adjusting schedule...', type: 'action' as const, timestamp: new Date() },
+      ...prev,
+    ].slice(0, 12));
+
+    setTimeout(() => setAgentState('idle'), 3000);
+  }, []);
+
+  const handleInterventionDismiss = useCallback(() => {
+    setInterventionActive(false);
+    setAgentState('idle');
+    
+    setThoughts((prev): CognitiveThought[] => [
+      { id: `defer-${Date.now()}`, text: 'User deferred. Rescheduling for next opportunity.', type: 'decision' as const, timestamp: new Date() },
+      ...prev,
+    ].slice(0, 12));
+  }, []);
+
+  const formatElapsed = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-50 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            className="relative w-full max-w-2xl h-[85vh] max-h-[700px] rounded-3xl overflow-hidden"
+            style={{ background: 'hsl(var(--surface-sunken))' }}
+          >
+            <motion.button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-30 p-2 rounded-full bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <X size={16} />
+            </motion.button>
+
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="absolute top-4 left-4 z-30"
+            >
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                Session
+              </p>
+              <p className="text-sm font-mono text-foreground tabular-nums">{formatElapsed(elapsedSeconds)}</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-30"
+            >
+              <motion.p
+                key={agentState}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs font-mono text-muted-foreground capitalize"
+              >
+                {agentState === 'idle' ? 'Observing' : agentState}
+              </motion.p>
+            </motion.div>
+
+            <div className="relative h-full flex flex-col">
+              <motion.div
+                className="flex-shrink-0 pt-16 pb-4"
+                animate={{
+                  height: interventionActive ? '30%' : '45%',
+                }}
+                transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                <div className="h-full flex items-center justify-center relative">
+                  <motion.div
+                    className="absolute"
+                    animate={{
+                      opacity: interventionActive ? 0.2 : 0.8,
+                      scale: interventionActive ? 0.8 : 1,
+                    }}
+                    transition={{ duration: 0.8 }}
+                  >
+                    <TimeFlowRing events={timeEvents} size={320} />
+                  </motion.div>
+
+                  <motion.div
+                    className="relative z-10"
+                    animate={{
+                      scale: agentState === 'intervening' ? 1.2 : 1,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <AgentPresenceCore state={agentState} size={interventionActive ? 120 : 160} />
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="flex-1 px-6 pb-6 overflow-hidden"
+                animate={{
+                  opacity: interventionActive ? 0.3 : 1,
+                }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="h-full rounded-2xl border border-border p-4 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mb-3">
+                    Cognitive Activity
+                  </p>
+                  <div className="h-[calc(100%-24px)]">
+                    <CognitiveStream thoughts={thoughts} maxVisible={6} />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            <InterventionLayer
+              active={interventionActive}
+              message={interventionMessage}
+              onRespond={handleInterventionRespond}
+              onDismiss={handleInterventionDismiss}
+            />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF FRONTEND FILES DOCUMENTATION
+# ═══════════════════════════════════════════════════════════════════════════════
