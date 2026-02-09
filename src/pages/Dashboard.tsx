@@ -3,12 +3,13 @@ import {
   Check, Flame, Target, Clock, FolderKanban, Zap, TrendingUp,
   ArrowUpRight, ArrowDownRight, Heart, ListTodo, Bot, Loader2
 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnticipationLayer } from '@/components/agent/AnticipationLayer';
 import { AgentOrb } from '@/components/agent/AgentOrb';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { api } from '@/services/api';
 import type { AgentEmotion, AnticipationItem } from '@/hooks/useAgentState';
 import type { BehaviorState } from '@/hooks/useBehaviorTracking';
-
 interface DashboardProps {
   agentEmotion: AgentEmotion;
   anticipations: AnticipationItem[];
@@ -77,12 +78,32 @@ function StatCard({ label, value, icon: Icon, trend, color }: {
 export default function DashboardPage({ agentEmotion, anticipations, behavior }: DashboardProps) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useDashboardData();
 
   const score = data?.productivity_score ?? 0;
   const streakDays = data?.streak_days ?? 0;
 
+  // Goal toggle mutation
+  const toggleGoalMutation = useMutation({
+    mutationFn: (goalId: string) => api.tasks.goals.toggle(goalId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  // AI Insights handlers
+  const handleAIInsight = async (type: string) => {
+    try {
+      // These would call the AI endpoints when implemented
+      console.log(`Requesting AI insight: ${type}`);
+      // Example: await api.ai.productivity.analyze()
+    } catch (err) {
+      console.error('AI insight error:', err);
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -216,9 +237,14 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
           </h2>
           <div className="rounded-xl border border-border p-4 bg-card space-y-2.5">
             {(data?.goals ?? []).slice(0, 5).map((g, i) => (
-              <div key={g.id || i} className="flex items-center gap-3 py-1">
+              <button
+                key={g.id || i}
+                onClick={() => g.id && toggleGoalMutation.mutate(g.id)}
+                disabled={toggleGoalMutation.isPending}
+                className="w-full flex items-center gap-3 py-1 text-left hover:bg-secondary/30 rounded-lg px-2 -mx-2 transition-colors"
+              >
                 <div
-                  className={`w-4.5 h-4.5 rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 transition-all ${
+                  className={`rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
                     g.completed
                       ? 'bg-accent border-accent'
                       : 'border-muted-foreground/30 hover:border-primary'
@@ -230,8 +256,11 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
                 <span className={`text-sm ${g.completed ? 'line-through text-muted-foreground' : 'text-secondary-foreground'}`}>
                   {g.title}
                 </span>
-              </div>
+              </button>
             ))}
+            {(data?.goals ?? []).length === 0 && (
+              <p className="text-xs text-muted-foreground py-2">No goals for today</p>
+            )}
           </div>
 
           <h2 className="text-sm font-display font-semibold text-secondary-foreground flex items-center gap-2 pt-2">
@@ -239,16 +268,17 @@ export default function DashboardPage({ agentEmotion, anticipations, behavior }:
           </h2>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'Productivity', icon: TrendingUp, color: 'hsl(var(--primary))' },
-              { label: 'Daily Plan', icon: Target, color: 'hsl(var(--accent))' },
-              { label: 'Health', icon: Heart, color: 'hsl(var(--agent-concerned))' },
-              { label: 'Finance', icon: Zap, color: 'hsl(var(--agent-thinking))' },
+              { label: 'Productivity', icon: TrendingUp, color: 'hsl(var(--primary))', type: 'productivity' },
+              { label: 'Daily Plan', icon: Target, color: 'hsl(var(--accent))', type: 'daily-plan' },
+              { label: 'Health', icon: Heart, color: 'hsl(var(--agent-concerned))', type: 'health' },
+              { label: 'Finance', icon: Zap, color: 'hsl(var(--agent-thinking))', type: 'finance' },
             ].map((a) => (
               <button
                 key={a.label}
-                className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors text-left"
+                onClick={() => handleAIInsight(a.type)}
+                className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-card hover:bg-secondary/50 hover:border-muted-foreground/30 transition-colors text-left group"
               >
-                <a.icon size={13} style={{ color: a.color }} />
+                <a.icon size={13} style={{ color: a.color }} className="group-hover:scale-110 transition-transform" />
                 <span className="text-xs text-secondary-foreground">{a.label}</span>
               </button>
             ))}

@@ -1,0 +1,341 @@
+# ============================================================================
+# NEW ENHANCED FEATURES DOCUMENTATION
+# Features present in our current frontend that are MISSING or ENHANCED
+# compared to the old frontend (Frontend v5)
+# ============================================================================
+# Created: 2026-02-09
+# ============================================================================
+
+This document outlines the unique and enhanced features in our current
+implementation that either don't exist or are significantly improved
+compared to the old Frontend v5.
+
+============================================================================
+1. LIVING CONTROL CHAMBER (Agent Living Popup)
+============================================================================
+
+Location: src/components/agent/AgentLivingPopup.tsx
+
+This is a MAJOR enhancement over the basic agent popup in the old frontend.
+
+UNIQUE FEATURES:
+----------------
+a) Real-Time API Integration
+   - Connected to /api/agent/status for live agent state
+   - Connected to /api/activity/timeline for real cognitive stream
+   - Automatic sync with backend (not just mock data simulation)
+
+b) Morphing Layout System
+   - Container morphs smoothly when interventions appear
+   - Upper zone (presence + time) shrinks during intervention
+   - Lower zone (cognitive stream) dims during focus moments
+   - All transitions use cubic-bezier easing for organic feel
+
+c) Time Flow Ring Integration
+   - Circular temporal visualization showing:
+     * Past events (faded markers)
+     * Current "now" marker (highlighted)
+     * Approaching events (future markers)
+   - Visual importance indicators (low/medium/high)
+   - Scales down during interventions to focus attention
+
+d) Intervention Layer System
+   - Full-screen overlay when agent needs attention
+   - User can respond with quick actions or dismiss
+   - Responses are logged back to cognitive stream
+   - Agent state transitions based on user response
+
+e) Session Timer
+   - Elapsed time counter in top-left
+   - Shows how long the popup has been open
+   - Useful for tracking observation sessions
+
+f) Cognitive Activity Stream
+   - Live stream of agent thoughts from API
+   - Fallback simulation when API returns no data
+   - Type-coded entries (observation, evaluation, decision, action, waiting)
+   - Animated entry/exit for thoughts
+
+============================================================================
+2. AGENT PRESENCE CORE VISUALIZATION
+============================================================================
+
+Location: src/components/agent/AgentPresenceCore.tsx
+
+A sophisticated multi-layer animated visualization:
+
+UNIQUE FEATURES:
+----------------
+a) Multi-Ring Breathing Animation
+   - Outer ring with slow breathing
+   - Inner pulse layer with faster rhythm
+   - Core orb with state-dependent behavior
+
+b) State-Aware Visual Changes
+   - idle: calm blue tones, slow breathing
+   - thinking: amber/gold tones, faster pulsing
+   - executing: energetic green, dynamic scaling
+   - intervening: attention-grabbing glow
+
+c) SVG-Based Rendering
+   - Precise control over visual elements
+   - Hardware-accelerated animations
+   - Scalable to any size
+
+============================================================================
+3. TIME FLOW RING COMPONENT
+============================================================================
+
+Location: src/components/agent/TimeFlowRing.tsx
+
+A circular timeline visualization showing temporal context:
+
+UNIQUE FEATURES:
+----------------
+a) Circular Time Representation
+   - Events positioned around the circle based on time
+   - Visual distinction between past/now/approaching/future
+
+b) Event Importance Indicators
+   - Size and visual treatment based on importance level
+   - High importance events have larger markers
+
+c) Interactive Labels
+   - Hover states for event details
+   - Time-until display for future events
+
+d) Minute-to-Angle Mapping
+   - Precise mathematical mapping of time to visual position
+   - Customizable time range (default: 2 hours)
+
+============================================================================
+4. COGNITIVE STREAM COMPONENT
+============================================================================
+
+Location: src/components/agent/CognitiveStream.tsx
+
+An enhanced thought stream with better visual hierarchy:
+
+UNIQUE FEATURES:
+----------------
+a) Type-Coded Visual System
+   - Each thought type has distinct color and icon
+   - observation: eye icon, blue tones
+   - evaluation: compare icon, amber tones
+   - decision: lightbulb icon, green tones
+   - action: zap icon, purple tones
+   - waiting: clock icon, muted tones
+
+b) Time Formatting
+   - "just now" for recent thoughts
+   - "Xm ago" for minutes
+   - "Xh ago" for hours
+   - Formatted date for older entries
+
+c) Animated List
+   - New thoughts slide in from top
+   - Smooth reordering with framer-motion
+   - Limited visible count for performance
+
+============================================================================
+5. INTERVENTION LAYER SYSTEM
+============================================================================
+
+Location: src/components/agent/InterventionLayer.tsx
+
+A sophisticated intervention overlay:
+
+UNIQUE FEATURES:
+----------------
+a) Full-Screen Focus Mode
+   - Dims/hides other UI elements
+   - Centers attention on intervention
+
+b) Quick Response Buttons
+   - Pre-configured response options
+   - Custom response input available
+
+c) Dismiss with Tracking
+   - Dismissals are logged to cognitive stream
+   - Agent adjusts behavior based on dismiss patterns
+
+d) Animated Entry/Exit
+   - Scale and opacity transitions
+   - Blur effects for focus
+
+============================================================================
+6. ANTICIPATION LAYER (Dashboard)
+============================================================================
+
+Location: src/components/agent/AnticipationLayer.tsx
+
+Shows upcoming events the agent is tracking:
+
+UNIQUE FEATURES:
+----------------
+a) Confidence-Based Opacity
+   - Events fade based on prediction confidence
+   - Higher confidence = more visible
+
+b) Type-Coded Styling
+   - action: primary color, zap icon
+   - reminder: amber, clock icon
+   - warning: red, alert icon
+
+c) Time-Until Display
+   - Shows relative time to each event
+   - Updates in real-time
+
+============================================================================
+7. AGENT ORB WITH EMOTIONAL STATES
+============================================================================
+
+Location: src/components/agent/AgentOrb.tsx
+
+An animated orb representing agent state:
+
+UNIQUE FEATURES:
+----------------
+a) Five Emotional States
+   - calm: blue gradient, slow breathing
+   - thinking: amber gradient, faster pulsing
+   - concerned: red-orange gradient, medium rhythm
+   - firm: steel gradient, minimal movement
+   - success: green gradient, celebratory pulse
+
+b) Three Size Variants
+   - sm: 32px (sidebar, header)
+   - md: 44px (cards, indicators)
+   - lg: 64px (focus areas)
+
+c) Multi-Layer Animation
+   - Outer glow ring with pulse
+   - Main orb with breathing
+   - Inner highlight with shimmer
+
+d) Interactive Hover/Tap
+   - Scale on hover
+   - Shrink on tap
+   - Smooth transitions
+
+============================================================================
+8. BEHAVIOR TRACKING SYSTEM
+============================================================================
+
+Location: src/hooks/useBehaviorTracking.ts
+
+Advanced user behavior analysis:
+
+UNIQUE FEATURES:
+----------------
+a) Flow State Detection
+   - Monitors mouse, keyboard, click activity
+   - Calculates inactivity duration
+   - Detects deep focus (>15min, <120s inactivity, <2 skips)
+
+b) Session Mood Classification
+   - productive: focus > 25min
+   - struggling: inactivity > 300s
+   - neutral: default state
+   - calm: light activity
+
+c) Task Interaction Tracking
+   - recordTaskSkip() - tracks avoidance
+   - recordTaskComplete() - boosts consistency
+
+d) Consistency Scoring
+   - 0-100 scale
+   - Increases with completions
+   - Decreases with skips
+
+============================================================================
+9. DASHBOARD DATA AGGREGATION
+============================================================================
+
+Location: src/hooks/useDashboardData.ts
+
+Sophisticated data fetching with React Query:
+
+UNIQUE FEATURES:
+----------------
+a) Multi-Query Aggregation
+   - Combines 5 different API calls
+   - Merges into single data object
+
+b) Smart Caching
+   - Different stale times per query type
+   - Auto-refetch intervals
+
+c) Fallback Handling
+   - Graceful degradation when APIs fail
+   - Default values for missing data
+
+============================================================================
+10. AGENT API INTEGRATION
+============================================================================
+
+Location: src/hooks/useAgentApi.ts
+
+Real-time agent status and timeline:
+
+UNIQUE FEATURES:
+----------------
+a) Status Polling
+   - Fetches agent status every 5 seconds
+   - Syncs state with backend
+
+b) Timeline Mapping
+   - Converts backend timeline entries to CognitiveThought format
+   - Maps entry types to thought types
+
+c) Combined Hook Interface
+   - Single hook returns status + thoughts + loading + error
+   - Easy to use in components
+
+============================================================================
+DESIGN SYSTEM ENHANCEMENTS
+============================================================================
+
+a) Custom CSS Variables for Agent States
+   - --agent-calm, --agent-thinking, --agent-concerned, etc.
+   - Semantic naming for all agent visuals
+
+b) Living Surface Class
+   - .living-surface for cards that "breathe"
+   - Subtle gradient backgrounds
+
+c) Pulse Animations
+   - .pulse-subtle for indicator dots
+   - Custom keyframes for organic movement
+
+d) Font System
+   - Space Grotesk for display headings
+   - System mono for data/metrics
+   - Proper hierarchy throughout
+
+============================================================================
+SUMMARY: What Makes This Frontend Special
+============================================================================
+
+1. LIVING AGENT EXPERIENCE
+   The agent isn't just a status indicator - it's a living presence with
+   visible thought processes, temporal awareness, and intervention abilities.
+
+2. REAL-TIME SYNCHRONIZATION
+   Connected to backend APIs with proper polling, caching, and error handling.
+
+3. BEHAVIOR-AWARE UI
+   The interface adapts based on detected user behavior patterns.
+
+4. SOPHISTICATED ANIMATIONS
+   Framer Motion throughout with carefully tuned easing and timing.
+
+5. DUAL-MODE TIMELINE
+   Both legacy sidebar timeline and immersive Living Chamber available.
+
+6. INTERVENTION SYSTEM
+   Full cycle from detection → display → response → logging.
+
+============================================================================
+# END OF DOCUMENTATION
+============================================================================

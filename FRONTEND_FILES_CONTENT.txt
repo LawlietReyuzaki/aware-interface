@@ -3274,6 +3274,41 @@ export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
 }
 
 
+================================================================================
+FILE: src/components/layout/SearchDialog.tsx (NEW)
+================================================================================
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, X, Loader2, FolderKanban, ListTodo, TrendingUp, Heart, Wallet, BookOpen, Shield, Users, Bot, Settings, LayoutDashboard } from 'lucide-react';
+import { api } from '@/services/api';
+import type { PageKey } from './AppSidebar';
+
+// Full-featured search dialog with:
+// - Cmd/Ctrl+K keyboard shortcut
+// - API-powered search results
+// - Quick actions for page navigation
+// - Keyboard navigation (arrow keys + enter)
+// - Animated entry/exit
+
+
+================================================================================
+FILE: src/components/layout/NotificationsDropdown.tsx (NEW)
+================================================================================
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, Check, Trash2, X, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/services/api';
+
+// Full notification system with:
+// - Unread count badge with animation
+// - API-connected notification list
+// - Mark as read / mark all read
+// - Clear read notifications
+// - Type-coded notifications (info, warning, success, error)
+// - Real-time polling every 30 seconds
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # END OF FRONTEND FILES DOCUMENTATION
 # ═══════════════════════════════════════════════════════════════════════════════
