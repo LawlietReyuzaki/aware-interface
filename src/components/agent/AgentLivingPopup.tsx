@@ -1,15 +1,23 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Activity, Clock, Zap } from 'lucide-react';
 import { AgentPresenceCore, type AgentState } from './AgentPresenceCore';
 import { TimeFlowRing } from './TimeFlowRing';
 import { CognitiveStream, type CognitiveThought } from './CognitiveStream';
 import { InterventionLayer } from './InterventionLayer';
 import { useAgentApi } from '@/hooks/useAgentApi';
+import type { BackgroundAgentState } from '@/hooks/useBackgroundAgent';
+
+interface BackgroundAgent extends BackgroundAgentState {
+  getActivityLog: () => Array<{ id: string; message: string; timestamp: Date; type: string }>;
+  addActivity: (message: string, type: string) => void;
+  triggerAction: (actionType: string) => Promise<void>;
+}
 
 interface AgentLivingPopupProps {
   open: boolean;
   onClose: () => void;
+  backgroundAgent?: BackgroundAgent;
 }
 
 // Simulated agent state machine
@@ -28,7 +36,7 @@ const COGNITIVE_THOUGHTS: Omit<CognitiveThought, 'id' | 'timestamp'>[] = [
   { text: 'Waiting for user acknowledgment', type: 'waiting' },
 ];
 
-export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
+export function AgentLivingPopup({ open, onClose, backgroundAgent }: AgentLivingPopupProps) {
   // Real API data
   const { agentState: apiState, thoughts: apiThoughts, isLoading } = useAgentApi();
   
@@ -45,12 +53,28 @@ export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
     }
   }, [apiState]);
 
-  // Merge API thoughts with local state
+  // Merge background agent activity with thoughts
   useEffect(() => {
-    if (apiThoughts.length > 0) {
-      setThoughts(apiThoughts);
+    if (backgroundAgent) {
+      const activityLog = backgroundAgent.getActivityLog();
+      if (activityLog.length > 0) {
+        const mappedThoughts: CognitiveThought[] = activityLog.slice(0, 10).map(entry => ({
+          id: entry.id,
+          text: entry.message,
+          type: (entry.type === 'observation' ? 'observation' : 
+                 entry.type === 'action' ? 'action' :
+                 entry.type === 'scheduler' ? 'evaluation' : 'observation') as CognitiveThought['type'],
+          timestamp: entry.timestamp,
+        }));
+        setThoughts(prev => {
+          // Merge without duplicates
+          const existingIds = new Set(prev.map(t => t.id));
+          const newThoughts = mappedThoughts.filter(t => !existingIds.has(t.id));
+          return [...newThoughts, ...prev].slice(0, 15);
+        });
+      }
     }
-  }, [apiThoughts]);
+  }, [backgroundAgent, backgroundAgent?.activityCount]);
 
   // Time events for the ring
   const timeEvents = useMemo(() => [
@@ -187,17 +211,43 @@ export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
               <X size={16} />
             </motion.button>
 
-            {/* Elapsed time indicator */}
+            {/* Status indicators row */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="absolute top-4 left-4 z-30"
+              className="absolute top-4 left-4 z-30 flex items-center gap-4"
             >
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                Session
-              </p>
-              <p className="text-sm font-mono text-foreground tabular-nums">{formatElapsed(elapsedSeconds)}</p>
+              <div>
+                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                  Session
+                </p>
+                <p className="text-sm font-mono text-foreground tabular-nums">{formatElapsed(elapsedSeconds)}</p>
+              </div>
+              
+              {/* Background agent status */}
+              {backgroundAgent && (
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${backgroundAgent.isRunning ? 'bg-green-500 animate-pulse' : 'bg-muted'}`} />
+                  <div>
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                      Agent
+                    </p>
+                    <p className="text-xs font-mono text-foreground">
+                      {backgroundAgent.isRunning ? 'Running' : 'Stopped'}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {backgroundAgent && (
+                <div>
+                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                    Activities
+                  </p>
+                  <p className="text-sm font-mono text-foreground tabular-nums">{backgroundAgent.activityCount}</p>
+                </div>
+              )}
             </motion.div>
 
             {/* State indicator */}
@@ -205,7 +255,7 @@ export function AgentLivingPopup({ open, onClose }: AgentLivingPopupProps) {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 z-30"
+              className="absolute top-4 right-16 z-30"
             >
               <motion.p
                 key={agentState}
